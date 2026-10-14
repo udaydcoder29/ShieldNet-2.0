@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Community</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080f1c;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);--em:#10d97c;--amber:#f59e0b;--blue:#3b82f6;--red:#ef4444;--purple:#a855f7;--text:#e2e8f0;--muted:#64748b;--card:rgba(10,18,33,0.95)}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;padding:24px;min-height:100vh}
+
+.page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.page-header h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
+.page-header p{font-size:13px;color:var(--muted)}
+.post-btn{padding:10px 20px;background:linear-gradient(135deg,var(--em),#06b6d4);color:#040a10;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 16px rgba(16,217,124,.25);transition:filter .2s,transform .15s;white-space:nowrap}
+.post-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+/* FILTERS */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.filter-chip{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .2s}
+.filter-chip:hover,.filter-chip.active{border-color:rgba(16,217,124,.35);background:rgba(16,217,124,.1);color:var(--em)}
+
+/* POST FORM */
+.post-form{background:var(--card);border:1px solid rgba(16,217,124,.25);border-radius:16px;padding:24px;margin-bottom:24px;display:none;animation:fadeUp .4s ease both}
+.post-form.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.form-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.f-field{margin-bottom:12px}
+.f-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.f-input,.f-select,.f-textarea{
+  width:100%;padding:11px 14px;background:rgba(255,255,255,.06);border:1px solid var(--border);
+  border-radius:9px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.f-input::placeholder,.f-textarea::placeholder{color:#2d3748}
+.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:rgba(16,217,124,.4);box-shadow:0 0 0 3px rgba(16,217,124,.08)}
+.f-select{appearance:none;cursor:pointer}
+.f-textarea{resize:vertical;min-height:80px;line-height:1.6}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.btn-cancel{padding:10px 18px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:9px;cursor:pointer;font-size:13px;transition:all .2s}
+.btn-cancel:hover{color:#fff;border-color:rgba(255,255,255,.2)}
+.btn-submit{padding:10px 22px;background:var(--em);color:#040a10;border:none;border-radius:9px;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;transition:filter .2s}
+.btn-submit:hover{filter:brightness(1.08)}
+
+/* POSTS */
+.posts-list{display:flex;flex-direction:column;gap:14px}
+.post-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;
+  transition:border-color .2s,transform .15s;animation:fadeUp .4s ease both;
+}
+.post-card:hover{border-color:rgba(16,217,124,.2);transform:translateY(-1px)}
+.post-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.post-av{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.post-meta{flex:1}
+.post-author{font-weight:600;color:#fff;font-size:14px}
+.post-info{font-size:11px;color:var(--muted);margin-top:2px}
+.post-badge{
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 10px;border-radius:20px;flex-shrink:0;
+}
+.badge-phishing{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.badge-upi{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+.badge-call{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.25)}
+.badge-job{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.badge-other{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
+
+.post-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:6px}
+.post-body{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.post-tag{
+  display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);margin-right:6px;
+}
+
+.post-actions{display:flex;align-items:center;gap:14px;padding-top:12px;border-top:1px solid var(--border)}
+.action-btn{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer;transition:color .2s;background:none;border:none;padding:0}
+.action-btn:hover{color:#fff}
+.action-btn.liked{color:var(--red)}
+.action-btn.warned{color:var(--amber)}
+.ai-btn{margin-left:auto;font-size:11px;font-weight:600;color:var(--em);background:rgba(16,217,124,.08);border:1px solid rgba(16,217,124,.2);padding:5px 12px;border-radius:20px;cursor:pointer;transition:background .2s}
+.ai-btn:hover{background:rgba(16,217,124,.15)}
+
+/* AI ANALYSIS INSIDE POST */
+.ai-analysis{
+  margin-top:14px;background:rgba(16,217,124,.05);border:1px solid rgba(16,217,124,.15);
+  border-radius:10px;padding:14px;font-size:13px;color:var(--text);line-height:1.7;display:none;
+}
+.ai-analysis.show{display:block}
+.ai-analysis .ai-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--em);margin-bottom:8px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(16,217,124,.3);border-top-color:var(--em);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.stat-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center}
+.stat-mini-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff}
+.stat-mini-label{font-size:11px;color:var(--muted);margin-top:2px}
+
+@media(max-width:500px){.form-row{grid-template-columns:1fr}.stats-bar{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>👥 Community</h1>
+    <p>Report scams, warn others, and stay informed — together</p>
+  </div>
+  <button class="post-btn" onclick="toggleForm()">+ Report a Scam</button>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-mini"><div class="stat-mini-val" id="sc-total">0</div><div class="stat-mini-label">Reports This Week</div></div>
+  <div class="stat-mini"><div class="stat-mini-val" style="color:var(--red)" id="sc-danger">0</div><div class="stat-mini-label">High Risk Alerts</div></div>
+  <div class="stat-mini"><div class="stat-mini-val" style="color:var(--em)" id="sc-safe">0</div><div class="stat-mini-label">Warnings Issued</div></div>
+</div>
+
+<!-- POST FORM -->
+<div class="post-form" id="postForm">
+  <div class="form-title">📢 Report a Scam to the Community</div>
+  <div class="form-row">
+    <div class="f-field">
+      <label class="f-label">Scam Type</label>
+      <select class="f-select" id="scamType">
+        <option style="background:#0d1829">Phishing / Fake Link</option>
+        <option style="background:#0d1829">UPI / Payment Fraud</option>
+        <option style="background:#0d1829">Suspicious Call</option>
+        <option style="background:#0d1829">Fake Job Offer</option>
+        <option style="background:#0d1829">Lottery / Prize Scam</option>
+        <option style="background:#0d1829">Other</option>
+      </select>
+    </div>
+    <div class="f-field">
+      <label class="f-label">Location (City)</label>
+      <input class="f-input" id="scamCity" placeholder="e.g. Mumbai"/>
+    </div>
+  </div>
+  <div class="f-field">
+    <label class="f-label">Title</label>
+    <input class="f-input" id="scamTitle" placeholder="Short description of the scam"/>
+  </div>
+  <div class="f-field">
+    <label class="f-label">Details</label>
+    <textarea class="f-textarea" id="scamDetails" placeholder="Describe what happened — the more detail, the better you warn others…"></textarea>
+  </div>
+  <div class="f-field">
+    <label class="f-label">Suspicious URL / Number (optional)</label>
+    <input class="f-input" id="scamEvidence" placeholder="e.g. +91 99999 XXXXX or http://fake.site"/>
+  </div>
+  <div class="form-actions">
+    <button class="btn-cancel" onclick="toggleForm()">Cancel</button>
+    <button class="btn-submit" onclick="submitPost()">Submit Report</button>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-row">
+  <div class="filter-chip active" onclick="filterPosts('all',this)">All Reports</div>
+  <div class="filter-chip" onclick="filterPosts('phishing',this)">🎣 Phishing</div>
+  <div class="filter-chip" onclick="filterPosts('upi',this)">💳 UPI Fraud</div>
+  <div class="filter-chip" onclick="filterPosts('call',this)">📞 Suspicious Calls</div>
+  <div class="filter-chip" onclick="filterPosts('job',this)">💼 Fake Jobs</div>
+</div>
+
+<!-- POSTS -->
+<div class="posts-list" id="postsList"></div>
+
+<script>
+const GEMINI_KEY = 'AIzaSyBxA1PZdTXs_V4Igq7bITOWNL0njEQxTjE';
+
+const SEED_POSTS = [
+  {id:1,avatar:'👩‍💼',author:'Priya M.',city:'Mumbai',time:'2h ago',type:'phishing',badge:'badge-phishing',label:'Phishing',title:'Fake HDFC Bank SMS with malicious link',body:'Received an SMS from what looked like HDFC saying my account will be blocked. The link was hdfc-secure-update.xyz — not the real site. Do NOT click. They asked for card number and OTP.',evidence:'hdfc-secure-update.xyz',tags:['Banking','SMS Scam'],likes:24,warns:18},
+  {id:2,avatar:'👨‍💻',author:'Rahul S.',city:'Pune',time:'5h ago',type:'upi',badge:'badge-upi',label:'UPI Fraud',title:'Received ₹1 and then got a ₹15,000 debit request',body:'Someone sent me ₹1 via PhonePe and then called saying they "accidentally" sent money and need it back. When I clicked the UPI request they sent, it debited ₹15,000 from my account. Classic "refund scam".',evidence:'+91 88001 23456',tags:['UPI','PhonePe','Refund Scam'],likes:56,warns:41},
+  {id:3,avatar:'🧑‍🎓',author:'Anjali K.',city:'Bengaluru',time:'1d ago',type:'call',badge:'badge-call',label:'Suspicious Call',title:'Fake TRAI officer threatened to disconnect my number',body:'Got a call from someone claiming to be from TRAI. Said my number was used in illegal activity and would be disconnected in 2 hours. They transferred me to a "police officer" who demanded ₹5000 to "clear my name". It\'s a scam.',evidence:'+91 99871 00234',tags:['TRAI Scam','Call Fraud'],likes:38,warns:29},
+  {id:4,avatar:'👨‍💼',author:'Vikram P.',city:'Delhi',time:'2d ago',type:'job',badge:'badge-job',label:'Fake Job',title:'Work from home data entry job asked for ₹2000 security deposit',body:'Found a job posting on Instagram for data entry ₹800/hour. They interviewed me over WhatsApp and asked for a ₹2000 "refundable training deposit". Blocked after I paid. DO NOT PAY any registration fee for jobs.',evidence:'workfromhome-jobs.in',tags:['Job Scam','Work From Home'],likes:44,warns:33},
+];
+
+let posts=[...SEED_POSTS];
+let filterType='all';
+
+function renderPosts(){
+  const list=document.getElementById('postsList');
+  const filtered=filterType==='all'?posts:posts.filter(p=>p.type===filterType);
+  list.innerHTML=filtered.map(p=>`
+    <div class="post-card" id="post-${p.id}">
+      <div class="post-top">
+        <div class="post-av">${p.avatar}</div>
+        <div class="post-meta">
+          <div class="post-author">${p.author} <span style="font-weight:400;color:var(--muted);font-size:12px">from ${p.city}</span></div>
+          <div class="post-info">${p.time}</div>
+        </div>
+        <div class="post-badge ${p.badge}">${p.label}</div>
+      </div>
+      <div class="post-title">${p.title}</div>
+      <div class="post-body">${p.body}</div>
+      ${p.evidence?`<div style="margin-bottom:12px"><span class="post-tag">🔗 ${p.evidence}</span></div>`:''}
+      <div>${p.tags.map(t=>`<span class="post-tag">${t}</span>`).join('')}</div>
+      <div class="post-actions">
+        <button class="action-btn liked" onclick="toggleLike(${p.id},this)">❤️ ${p.likes}</button>
+        <button class="action-btn warned" onclick="toggleWarn(${p.id},this)">⚠️ ${p.warns} warned</button>
+        <button class="action-btn" onclick="sharePost(${p.id})">🔗 Share</button>
+        <button class="ai-btn" onclick="aiAnalyse(${p.id},this)">🤖 AI Analysis</button>
+      </div>
+      <div class="ai-analysis" id="ai-${p.id}"></div>
+    </div>`).join('');
+
+  document.getElementById('sc-total').textContent=posts.length+247;
+  document.getElementById('sc-danger').textContent=posts.filter(p=>p.type==='phishing'||p.type==='upi').length+89;
+  document.getElementById('sc-safe').textContent=posts.reduce((a,b)=>a+b.warns,0)+1240;
+}
+
+function filterPosts(type,el){
+  filterType=type;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderPosts();
+}
+
+function toggleForm(){
+  const f=document.getElementById('postForm');
+  f.classList.toggle('show');
+}
+
+function submitPost(){
+  const title=document.getElementById('scamTitle').value.trim();
+  const body=document.getElementById('scamDetails').value.trim();
+  const type=document.getElementById('scamType').value;
+  const city=document.getElementById('scamCity').value.trim()||'India';
+  const ev=document.getElementById('scamEvidence').value.trim();
+  if(!title||!body){alert('Please fill in title and details.');return}
+
+  const typeMap={'Phishing / Fake Link':'phishing','UPI / Payment Fraud':'upi','Suspicious Call':'call','Fake Job Offer':'job'};
+  const badgeMap={'phishing':'badge-phishing','upi':'badge-upi','call':'badge-call','job':'badge-job'};
+  const labelMap={'phishing':'Phishing','upi':'UPI Fraud','call':'Suspicious Call','job':'Fake Job'};
+  const t=typeMap[type]||'other';
+
+  posts.unshift({
+    id:Date.now(),avatar:'👤',author:'You',city,time:'Just now',
+    type:t,badge:badgeMap[t]||'badge-other',label:labelMap[t]||'Other',
+    title,body,evidence:ev,tags:[],likes:0,warns:0
+  });
+  renderPosts();
+  toggleForm();
+  ['scamTitle','scamDetails','scamEvidence','scamCity'].forEach(id=>document.getElementById(id).value='');
+}
+
+function toggleLike(id,btn){
+  const p=posts.find(x=>x.id===id);if(!p)return;
+  p.likes+=btn.classList.contains('liked')?-1:1;
+  btn.textContent=`❤️ ${p.likes}`;
+}
+function toggleWarn(id,btn){
+  const p=posts.find(x=>x.id===id);if(!p)return;
+  p.warns+=btn.classList.contains('warned')?-1:1;
+  btn.textContent=`⚠️ ${p.warns} warned`;
+}
+function sharePost(id){
+  const p=posts.find(x=>x.id===id);if(!p)return;
+  navigator.clipboard?.writeText(`🚨 ShieldNet Scam Alert: ${p.title}\n${p.body.slice(0,100)}…\nStay safe!`).then(()=>alert('Copied to clipboard!'));
+}
+
+async function aiAnalyse(id,btn){
+  const p=posts.find(x=>x.id===id);if(!p)return;
+  const box=document.getElementById('ai-'+id);
+  if(box.classList.contains('show')){box.classList.remove('show');btn.textContent='🤖 AI Analysis';return}
+  box.classList.add('show');
+  box.innerHTML=`<div class="ai-label">🤖 Gemini AI Analysis</div><div><span class="spinner"></span> Analysing…</div>`;
+  btn.textContent='⏳ Analysing…';btn.disabled=true;
+
+  try{
+    const prompt=`Analyse this scam report and provide a structured analysis:\nTitle: ${p.title}\nType: ${p.label}\nDescription: ${p.body}\nEvidence: ${p.evidence||'none'}\n\nProvide: 1) How this scam works 2) Red flags to watch for 3) What the victim should do now 4) How to report this to authorities in India. Keep it concise and practical.`;
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.3,maxOutputTokens:500}})
+    });
+    const data=await res.json();
+    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'Could not analyse.';
+    box.innerHTML=`<div class="ai-label">🤖 Gemini AI Analysis</div>${reply.replace(/\n/g,'<br>')}`;
+  }catch(e){
+    box.innerHTML=`<div class="ai-label">🤖 Gemini AI Analysis</div>⚠️ Error: ${e.message}`;
+  }
+  btn.textContent='🤖 Hide Analysis';btn.disabled=false;
+}
+
+renderPosts();
+</script>
+</body>
+</html>

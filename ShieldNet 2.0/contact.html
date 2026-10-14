@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShieldNet — Contact</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080f1c;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);
+  --em:#10d97c;--amber:#f59e0b;--blue:#3b82f6;--red:#ef4444;
+  --text:#e2e8f0;--muted:#64748b;--card:rgba(10,18,33,0.9);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;overflow-x:hidden;min-height:100vh}
+
+/* BG */
+.bg-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:.28;animation:blobDrift 20s ease-in-out infinite alternate}
+.blob1{width:700px;height:700px;left:-200px;top:-100px;background:radial-gradient(circle,#10d97c55,transparent 70%);animation-delay:0s}
+.blob2{width:550px;height:550px;right:-120px;bottom:10%;background:radial-gradient(circle,#3b82f655,transparent 70%);animation-delay:-8s}
+.blob3{width:400px;height:400px;left:50%;top:40%;background:radial-gradient(circle,#f59e0b22,transparent 70%);animation-delay:-15s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-40px) scale(1.08)}100%{transform:translate(-20px,30px) scale(.95)}}
+.bg-scene::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:56px 56px}
+
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:var(--em);opacity:0;animation:pFloat linear infinite}
+@keyframes pFloat{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.2}90%{opacity:.08}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(8,15,28,.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(to right,#fff 30%,var(--em));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--em),#06b6d4);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(16,217,124,.35);flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-links a{color:var(--muted);font-size:14px;font-weight:500;text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:#fff}.nav-links a.active{color:var(--em)}
+.nav-cta{padding:9px 22px;background:var(--em);color:#040a10;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 18px rgba(16,217,124,.3);transition:box-shadow .2s,transform .15s,filter .2s;text-decoration:none;display:inline-flex;align-items:center}
+.nav-cta:hover{box-shadow:0 6px 26px rgba(16,217,124,.45);filter:brightness(1.06);transform:translateY(-1px)}
+
+/* MAIN */
+main{position:relative;z-index:1;padding-top:68px}
+
+/* HERO */
+.hero-section{padding:90px 24px 60px;text-align:center;position:relative}
+.hero-section::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:1px;height:70px;background:linear-gradient(to bottom,var(--em),transparent)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(16,217,124,.1);border:1px solid rgba(16,217,124,.25);color:var(--em);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:28px;animation:fadeUp .6s ease .1s both}
+.dot-live{width:7px;height:7px;border-radius:50%;background:var(--em);box-shadow:0 0 6px var(--em);animation:pulse 2s ease infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(40px,6vw,80px);font-weight:800;line-height:1.0;letter-spacing:-2px;margin-bottom:20px;animation:fadeUp .7s ease .2s both}
+.hero-title .w1{color:#fff}.hero-title .w2{background:linear-gradient(90deg,var(--em),#06b6d4 50%,var(--amber));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 5s linear infinite}
+@keyframes shimmer{to{background-position:200% center}}
+.hero-desc{font-size:17px;color:var(--muted);max-width:520px;line-height:1.8;margin:0 auto 0;animation:fadeUp .7s ease .35s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+/* CHANNELS */
+.channels-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  max-width:1100px;margin:80px auto 0;padding:0 48px;
+  position:relative;z-index:1;
+}
+.ch-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:28px 22px;text-align:center;
+  opacity:0;transform:translateY(24px);
+  transition:border-color .25s,transform .25s;
+  cursor:pointer;text-decoration:none;display:block;color:var(--text);
+}
+.ch-card.visible{animation:riseIn .6s ease forwards}
+@keyframes riseIn{to{opacity:1;transform:translateY(0)}}
+.ch-card:hover{border-color:rgba(16,217,124,.3);transform:translateY(-5px)}
+.ch-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;transition:transform .2s}
+.ch-card:hover .ch-icon{transform:scale(1.1) rotate(-5deg)}
+.ch-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:6px}
+.ch-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.ch-badge{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;padding:3px 10px;border-radius:20px;margin-top:12px}
+
+/* CONTACT LAYOUT */
+.contact-wrap{
+  display:grid;grid-template-columns:1fr 1.4fr;gap:56px;
+  max-width:1100px;margin:100px auto 0;padding:0 48px;
+}
+
+/* LEFT INFO */
+.info-side{}
+.section-label{display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--em);margin-bottom:14px}
+.section-label::before{content:'';width:20px;height:2px;background:var(--em);border-radius:1px}
+.info-title{font-family:'Syne',sans-serif;font-size:clamp(28px,3.5vw,42px);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-1px;margin-bottom:16px}
+.info-sub{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:36px}
+
+.office-cards{display:flex;flex-direction:column;gap:14px}
+.office-card{
+  display:flex;gap:16px;align-items:flex-start;
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;
+  transition:border-color .2s,transform .2s;
+  opacity:0;transform:translateX(-20px);
+}
+.office-card.visible{animation:slideRight .6s ease forwards}
+@keyframes slideRight{to{opacity:1;transform:translateX(0)}}
+.office-card:hover{border-color:rgba(16,217,124,.25);transform:translateX(4px)}
+.oc-flag{font-size:28px;flex-shrink:0;line-height:1}
+.oc-city{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;margin-bottom:3px}
+.oc-addr{font-size:12px;color:var(--muted);line-height:1.5}
+.oc-type{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--em);text-transform:uppercase;margin-top:5px}
+
+/* FAQ mini */
+.faq-wrap{margin-top:36px}
+.faq-label{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden}
+.faq-q{
+  width:100%;background:none;border:none;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;
+  padding:14px 0;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  transition:color .2s;
+}
+.faq-q:hover{color:#fff}
+.faq-arrow{width:16px;height:16px;color:var(--muted);transition:transform .3s,color .2s;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg);color:var(--em)}
+.faq-item.open .faq-q{color:var(--em)}
+.faq-a{font-size:13px;color:var(--muted);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:14px}
+
+/* FORM SIDE */
+.form-card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:40px 40px 44px;
+  box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset;
+  opacity:0;transform:translateX(30px);
+}
+.form-card.visible{animation:slideLeft .7s ease forwards}
+@keyframes slideLeft{to{opacity:1;transform:translateX(0)}}
+
+.form-heading{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+.form-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.5}
+
+/* topic pills */
+.topic-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.tp{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:var(--surface);transition:background .2s,border-color .2s,color .2s,transform .15s}
+.tp:hover{transform:translateY(-1px)}
+.tp.active{background:rgba(16,217,124,.12);border-color:rgba(16,217,124,.35);color:var(--em)}
+
+/* fields */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.input-wrap{position:relative}
+.f-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;transition:color .2s}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px 12px 42px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;
+  color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.field select{appearance:none;cursor:pointer}
+.field textarea{padding:12px 14px 12px 42px;resize:vertical;min-height:120px;line-height:1.6}
+.field input::placeholder,.field textarea::placeholder{color:#2d3748}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:rgba(16,217,124,.45);background:rgba(16,217,124,.04);
+  box-shadow:0 0 0 3px rgba(16,217,124,.09);
+}
+.input-wrap:focus-within .f-icon{color:var(--em)}
+
+/* file upload */
+.upload-zone{
+  border:2px dashed var(--border);border-radius:10px;padding:24px;
+  text-align:center;cursor:pointer;transition:border-color .2s,background .2s;
+  color:var(--muted);font-size:13px;margin-bottom:16px;
+  position:relative;
+}
+.upload-zone:hover,.upload-zone.dragover{border-color:rgba(16,217,124,.4);background:rgba(16,217,124,.04)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:28px;margin-bottom:8px}
+.upload-zone strong{color:var(--em)}
+
+/* submit */
+.submit-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:8px}
+.privacy-note{font-size:11px;color:var(--muted);line-height:1.5;flex:1;min-width:160px}
+.privacy-note a{color:var(--em);text-decoration:none}
+
+.btn-submit{
+  padding:14px 32px;background:linear-gradient(135deg,var(--em),#06b6d4);
+  color:#040a10;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:10px;
+  cursor:pointer;display:flex;align-items:center;gap:10px;
+  box-shadow:0 4px 22px rgba(16,217,124,.28);
+  transition:box-shadow .2s,transform .15s,filter .2s;
+  position:relative;overflow:hidden;
+}
+.btn-submit::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .15s}
+.btn-submit:hover::before{background:rgba(255,255,255,.08)}
+.btn-submit:hover{box-shadow:0 6px 32px rgba(16,217,124,.42);filter:brightness(1.06);transform:translateY(-1px)}
+.btn-submit:active{transform:scale(.98)}
+
+/* Success toast */
+.toast{
+  display:none;position:fixed;bottom:32px;right:32px;z-index:999;
+  background:rgba(16,217,124,.12);border:1px solid rgba(16,217,124,.35);
+  border-radius:14px;padding:18px 24px;
+  display:flex;align-items:center;gap:14px;
+  backdrop-filter:blur(16px);
+  transform:translateY(100px);opacity:0;
+  transition:transform .4s cubic-bezier(.22,.68,0,1.2),opacity .4s;
+  max-width:340px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{font-size:24px;flex-shrink:0}
+.toast-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
+.toast-sub{font-size:12px;color:var(--muted)}
+
+/* SOCIAL STRIP */
+.social-strip{max-width:1100px;margin:80px auto 0;padding:0 48px}
+.social-inner{
+  background:rgba(255,255,255,.018);border:1px solid var(--border);border-radius:20px;
+  padding:48px 48px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;
+}
+.social-text .stitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+.social-text .ssub{font-size:14px;color:var(--muted)}
+.social-icons{display:flex;gap:12px}
+.soc-btn{
+  width:46px;height:46px;border-radius:12px;border:1px solid var(--border);
+  background:var(--surface);display:flex;align-items:center;justify-content:center;
+  color:var(--muted);cursor:pointer;text-decoration:none;
+  transition:border-color .2s,color .2s,background .2s,transform .2s;font-size:20px;
+}
+.soc-btn:hover{border-color:rgba(16,217,124,.3);color:#fff;background:rgba(16,217,124,.08);transform:translateY(-3px)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:28px 48px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-top:80px}
+.footer-copy{font-size:13px;color:var(--muted)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--em)}
+
+@media(max-width:960px){
+  .channels-row{grid-template-columns:1fr 1fr;padding:0 24px}
+  .contact-wrap{grid-template-columns:1fr;padding:0 24px;margin-top:60px}
+  .form-card{padding:28px 22px 32px}
+  .field-row{grid-template-columns:1fr}
+  .social-strip{padding:0 24px}
+  .social-inner{padding:32px 28px}
+}
+@media(max-width:600px){
+  nav{padding:0 20px}.nav-links{display:none}
+  .channels-row{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:16px;text-align:center}
+  .submit-row{flex-direction:column;align-items:stretch}
+  .btn-submit{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-scene">
+  <div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-mark">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="white" opacity=".9"/>
+        <path d="M9 12l2 2 4-4" stroke="#040a10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    ShieldNet
+  </a>
+  <div class="nav-links">
+    <a href="about.html">About</a>
+    <a href="contact.html" class="active">Contact</a>
+  </div>
+  <a href="index.html" class="nav-cta">Get Started</a>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero-section">
+    <div class="eyebrow"><span class="dot-live"></span>We're Here to Help</div>
+    <h1 class="hero-title">
+      <span class="w1">Get in</span>
+      <span class="w2"> Touch</span>
+    </h1>
+    <p class="hero-desc">Whether you have a security emergency, want to explore enterprise plans, or just want to say hello — we respond within 2 hours.</p>
+  </div>
+
+  <!-- CHANNELS -->
+  <div class="channels-row">
+    <a class="ch-card" href="mailto:hello@shieldnet.io">
+      <div class="ch-icon" style="background:rgba(16,217,124,.12)">📧</div>
+      <div class="ch-title">Email Us</div>
+      <div class="ch-sub">hello@shieldnet.io</div>
+      <span class="ch-badge" style="background:rgba(16,217,124,.1);color:var(--em)">Replies in 2h</span>
+    </a>
+    <a class="ch-card" href="#">
+      <div class="ch-icon" style="background:rgba(59,130,246,.12)">💬</div>
+      <div class="ch-title">Live Chat</div>
+      <div class="ch-sub">In-app support chat available 24/7</div>
+      <span class="ch-badge" style="background:rgba(59,130,246,.1);color:var(--blue)">Online Now</span>
+    </a>
+    <a class="ch-card" href="tel:+918000000000">
+      <div class="ch-icon" style="background:rgba(245,158,11,.12)">📞</div>
+      <div class="ch-title">Call Us</div>
+      <div class="ch-sub">+91 80000 00000<br>Mon–Fri, 9am–7pm IST</div>
+      <span class="ch-badge" style="background:rgba(245,158,11,.1);color:var(--amber)">Business Hours</span>
+    </a>
+    <a class="ch-card" href="#">
+      <div class="ch-icon" style="background:rgba(239,68,68,.12)">🚨</div>
+      <div class="ch-title">Security Incident</div>
+      <div class="ch-sub">Active breach? Emergency SOC line available</div>
+      <span class="ch-badge" style="background:rgba(239,68,68,.1);color:var(--red)">Priority: Critical</span>
+    </a>
+  </div>
+
+  <!-- CONTACT FORM + INFO -->
+  <div class="contact-wrap">
+
+    <!-- LEFT -->
+    <div class="info-side">
+      <div class="section-label">Reach Out</div>
+      <h2 class="info-title">We'd Love to<br>Hear from You</h2>
+      <p class="info-sub">Our team spans 4 time zones so someone is always ready. Pick the channel that works best for you, or just fill the form.</p>
+
+      <div class="office-cards">
+        <div class="office-card">
+          <span class="oc-flag">🇮🇳</span>
+          <div>
+            <div class="oc-city">Nagpur, Maharashtra</div>
+            <div class="oc-addr">42 Manish Nagar,<br>Nagpur,Maharashtra 440089</div>
+            <div class="oc-type">HQ & Engineering</div>
+          </div>
+        </div>
+        <div class="office-card">
+          <span class="oc-flag">🇺🇸</span>
+          <div>
+            <div class="oc-city">Mumbai, Maharashtra</div>
+            <div class="oc-addr">345 Andheri East, Suite 2800,<br>Mumbai, 94111</div>
+            <div class="oc-type">Sales & Partnerships</div>
+          </div>
+        </div>
+        <div class="office-card">
+          <span class="oc-flag">🇬🇧</span>
+          <div>
+            <div class="oc-city">Chattrapati Chowk, Nagpur</div>
+            <div class="oc-addr">Pratap Nagar,near Chattrapati Chowk,<br>Nagpur</div>
+            <div class="oc-type">EMEA Operations</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="faq-wrap">
+        <div class="faq-label">Quick Answers</div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            What's your response time for free users?
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Free tier users receive email support with typical response times of 24–48 hours. Pro and Enterprise customers get priority response within 2 hours, with a dedicated channel.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Do you offer custom enterprise pricing?
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Yes — for teams of 100+ users we offer volume discounts, custom SLAs, dedicated account managers, and on-prem deployment options. Use the form to request a quote.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            How do I report a security vulnerability?
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">We take security reports seriously. Please email security@shieldnet.io with a detailed description. We operate a responsible disclosure program with up to $10,000 in bug bounties.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Can I request a live demo?
+            <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Absolutely. Select "Request Demo" in the form topic and our solutions engineers will schedule a personalised 30-minute walkthrough within 24 hours.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT FORM -->
+    <div class="form-card" id="formCard">
+      <div class="form-heading">Send us a Message</div>
+      <p class="form-sub">Fill in the details and we'll route you to the right team instantly.</p>
+
+      <!-- Topic pills -->
+      <div class="topic-pills" id="topicPills">
+        <div class="tp active" onclick="selectTopic(this)">General Enquiry</div>
+        <div class="tp" onclick="selectTopic(this)">Enterprise Sales</div>
+        <div class="tp" onclick="selectTopic(this)">Request Demo</div>
+        <div class="tp" onclick="selectTopic(this)">Technical Support</div>
+        <div class="tp" onclick="selectTopic(this)">Press & Media</div>
+        <div class="tp" onclick="selectTopic(this)">Bug Report</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>First Name</label>
+          <div class="input-wrap">
+            <svg class="f-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="fname" placeholder="Arjun"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <div class="input-wrap">
+            <svg class="f-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="lname" placeholder="Mehta"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <svg class="f-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+          <input type="email" id="email" placeholder="arjun@company.com"/>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Company</label>
+          <div class="input-wrap">
+            <svg class="f-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+            <input type="text" id="company" placeholder="Acme Corp"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Team Size</label>
+          <div class="input-wrap">
+            <svg class="f-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <select id="teamsize">
+              <option value="" style="background:#0d1829">Select size</option>
+              <option style="background:#0d1829">Just me</option>
+              <option style="background:#0d1829">2–10</option>
+              <option style="background:#0d1829">11–50</option>
+              <option style="background:#0d1829">51–200</option>
+              <option style="background:#0d1829">200+</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Message</label>
+        <div class="input-wrap">
+          <svg class="f-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="top:16px;transform:none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <textarea id="message" placeholder="Tell us about your security needs or what you'd like to discuss…"></textarea>
+        </div>
+      </div>
+
+      <!-- File upload -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.zip" onchange="handleFile(this)"/>
+        <div class="upload-icon">📎</div>
+        <div>Drop files here or <strong>browse</strong></div>
+        <div style="font-size:11px;margin-top:4px;color:var(--muted)">PDF, PNG, JPG, ZIP up to 10MB</div>
+        <div id="fileName" style="margin-top:8px;font-size:12px;color:var(--em)"></div>
+      </div>
+
+      <div class="submit-row">
+        <div class="privacy-note">By submitting you agree to our <a href="#">Privacy Policy</a>. We never share your data.</div>
+        <button class="btn-submit" onclick="submitForm()">
+          Send Message
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SOCIAL -->
+  <div class="social-strip">
+    <div class="social-inner">
+      <div class="social-text">
+        <div class="stitle">Follow the Shield</div>
+        <div class="ssub">Security tips, threat alerts, and company updates — wherever you hang out online.</div>
+      </div>
+      <div class="social-icons">
+        <a class="soc-btn" href="#" title="Twitter/X">𝕏</a>
+        <a class="soc-btn" href="#" title="LinkedIn">in</a>
+        <a class="soc-btn" href="#" title="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.19c0 4.5 2.87 8.33 6.84 9.68.5.09.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.45-1.17-1.1-1.48-1.1-1.48-.9-.63.07-.62.07-.62 1 .07 1.52 1.05 1.52 1.05.88 1.54 2.31 1.1 2.87.84.09-.65.35-1.1.63-1.35-2.22-.26-4.56-1.13-4.56-5.04 0-1.11.39-2.02 1.03-2.73-.1-.26-.45-1.3.1-2.7 0 0 .84-.27 2.75 1.05A9.4 9.4 0 0 1 12 7.8c.85 0 1.7.12 2.5.34 1.91-1.32 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.71 1.03 1.62 1.03 2.73 0 3.92-2.34 4.78-4.57 5.03.36.32.68.94.68 1.9v2.82c0 .27.18.59.69.49A10.2 10.2 0 0 0 22 12.19C22 6.58 17.52 2 12 2z"/></svg>
+        </a>
+        <a class="soc-btn" href="#" title="Discord">💬</a>
+        <a class="soc-btn" href="#" title="YouTube">▶</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-copy">© 2025 ShieldNet Technologies. All rights reserved.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="about.html">About</a>
+    </div>
+  </footer>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✅</span>
+  <div>
+    <div class="toast-title">Message Sent!</div>
+    <div class="toast-sub">We'll get back to you within 2 hours.</div>
+  </div>
+</div>
+
+<script>
+// Particles
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div');d.className='particle';
+    const sz=Math.random()*3+1;
+    d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${Math.random()*22+16}s;animation-delay:-${Math.random()*22}s`;
+    c.appendChild(d);
+  }
+})();
+
+// Scroll reveal
+(function(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('visible'),e.target.dataset.delay||0);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.ch-card,.office-card').forEach((el,i)=>{el.dataset.delay=i*100;obs.observe(el)});
+  // form card
+  const fc=document.getElementById('formCard');
+  new IntersectionObserver(e=>{if(e[0].isIntersecting)fc.classList.add('visible')},{threshold:.1}).observe(fc);
+})();
+
+// Topic pills
+function selectTopic(el){
+  document.querySelectorAll('.tp').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// File upload
+function handleFile(input){
+  const fn=document.getElementById('fileName');
+  if(input.files.length>0) fn.textContent='📎 '+input.files[0].name;
+}
+
+// Drag over zone
+const uz=document.getElementById('uploadZone');
+['dragenter','dragover'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.classList.add('dragover')}));
+['dragleave','drop'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.classList.remove('dragover')}));
+
+// FAQ accordion
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
+  const isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(f=>f.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+// Form submit
+function submitForm(){
+  const email=document.getElementById('email').value;
+  const message=document.getElementById('message').value;
+  if(!email||!message){
+    // shake the button
+    const btn=document.querySelector('.btn-submit');
+    btn.style.animation='shake .3s ease';
+    setTimeout(()=>btn.style.animation='',300);
+    return;
+  }
+  const toast=document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),4000);
+  // clear form
+  ['fname','lname','email','company','message'].forEach(id=>document.getElementById(id).value='');
+}
+
+const style=document.createElement('style');
+style.textContent='@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>

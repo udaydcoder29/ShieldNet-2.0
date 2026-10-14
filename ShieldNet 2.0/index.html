@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShieldNet — Secure Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080f1c;--bg2:#0d1829;
+  --surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);
+  --em:#10d97c;--em2:#06c46e;--amber:#f59e0b;--blue:#3b82f6;
+  --text:#e2e8f0;--muted:#64748b;--card-bg:rgba(10,18,33,0.92);
+}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh}
+
+/* BG BLOBS */
+.bg-scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:blobDrift 18s ease-in-out infinite alternate}
+.blob1{width:700px;height:700px;left:-200px;top:-150px;background:radial-gradient(circle,#10d97c55,transparent 70%);animation-delay:0s}
+.blob2{width:500px;height:500px;right:-100px;bottom:0;background:radial-gradient(circle,#3b82f655,transparent 70%);animation-delay:-6s}
+.blob3{width:400px;height:400px;left:40%;top:30%;background:radial-gradient(circle,#f59e0b33,transparent 70%);animation-delay:-12s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-40px) scale(1.08)}100%{transform:translate(-20px,30px) scale(.95)}}
+.bg-scene::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:56px 56px}
+
+/* PARTICLES */
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:var(--em);opacity:0;animation:particleFloat linear infinite}
+@keyframes particleFloat{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.25}90%{opacity:.1}100%{opacity:0;transform:translateY(-20vh) scale(1)}}
+
+/* NAVBAR */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:68px;background:rgba(8,15,28,.8);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);animation:navDown .6s cubic-bezier(.22,.68,0,1.2) both}
+@keyframes navDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.nav-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(to right,#fff 30%,var(--em));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--em),#06b6d4);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(16,217,124,.35);flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-links a{color:var(--muted);font-size:14px;font-weight:500;text-decoration:none;letter-spacing:.02em;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-cta{padding:9px 22px;background:var(--em);color:#040a10;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer;box-shadow:0 4px 18px rgba(16,217,124,.3);transition:box-shadow .2s,transform .15s,filter .2s}
+.nav-cta:hover{box-shadow:0 6px 26px rgba(16,217,124,.45);filter:brightness(1.06);transform:translateY(-1px)}
+
+/* LAYOUT */
+.page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;padding:100px 48px 48px;gap:60px;max-width:1260px;margin:0 auto}
+
+/* HERO */
+.hero{flex:1;display:flex;flex-direction:column;gap:28px;animation:heroIn .8s cubic-bezier(.22,.68,0,1.2) .2s both}
+@keyframes heroIn{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(16,217,124,.1);border:1px solid rgba(16,217,124,.25);color:var(--em);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:20px;width:fit-content;animation:pillPop .5s cubic-bezier(.22,.68,0,1.5) .5s both}
+@keyframes pillPop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--em);box-shadow:0 0 6px var(--em);animation:pulse 2s ease infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(36px,4.5vw,62px);font-weight:800;line-height:1.06;letter-spacing:-1px}
+.hero-title .line1{display:block;color:#fff}
+.hero-title .line2{display:block;background:linear-gradient(90deg,var(--em) 0%,#06b6d4 50%,var(--amber) 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
+@keyframes shimmer{to{background-position:200% center}}
+.hero-sub{font-size:16px;font-weight:400;color:var(--muted);line-height:1.7;max-width:420px}
+
+/* STATS */
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:4px}
+.stat-card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 20px;backdrop-filter:blur(10px);animation:statIn .6s cubic-bezier(.22,.68,0,1.2) both;transition:border-color .2s,transform .2s}
+.stat-card:hover{border-color:rgba(16,217,124,.3);transform:translateY(-2px)}
+.stat-card:nth-child(1){animation-delay:.7s}.stat-card:nth-child(2){animation-delay:.85s}.stat-card:nth-child(3){animation-delay:1s}
+@keyframes statIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.stat-tag{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--em);background:rgba(16,217,124,.1);padding:3px 8px;border-radius:5px}
+.stat-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff}
+.stat-label{font-size:12px;color:var(--muted);margin-top:1px}
+
+/* AUTH CARD */
+.auth-panel{width:420px;flex-shrink:0;animation:authIn .8s cubic-bezier(.22,.68,0,1.2) .35s both}
+@keyframes authIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;backdrop-filter:blur(24px);box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 40px 80px rgba(0,0,0,.7),0 0 60px rgba(16,217,124,.05)}
+
+/* MAIN TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:18px 0;background:none;border:none;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;position:relative;transition:color .25s}
+.tab::after{content:'';position:absolute;bottom:-1px;left:50%;right:50%;height:2px;background:var(--em);border-radius:2px 2px 0 0;transition:left .35s cubic-bezier(.22,.68,0,1.2),right .35s cubic-bezier(.22,.68,0,1.2)}
+.tab.active{color:#fff}
+.tab.active::after{left:16%;right:16%}
+.tab-pre{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--em);opacity:.8;margin-right:5px}
+
+/* PANEL */
+.panel{display:none;padding:32px 36px 36px;animation:panelIn .35s ease both}
+.panel.active{display:block}
+@keyframes panelIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.panel-heading{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
+.panel-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+
+/* METHOD TABS */
+.method-tabs{display:flex;gap:8px;margin-bottom:22px}
+.method-btn{flex:1;padding:9px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .15s}
+.method-btn.active{background:rgba(16,217,124,.12);border-color:rgba(16,217,124,.35);color:var(--em)}
+.method-btn:hover:not(.active){border-color:rgba(255,255,255,.15);color:#fff;transform:translateY(-1px)}
+.method-panel{display:none}.method-panel.active{display:block}
+
+/* FIELDS */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.input-wrap{position:relative;display:flex;align-items:center}
+.input-pre{position:absolute;left:14px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;pointer-events:none;transition:color .2s}
+.field input{width:100%;padding:13px 14px 13px 46px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:15px;outline:none;transition:border-color .2s,background .2s,box-shadow .2s}
+.field input::placeholder{color:#2d3748}
+.field input:focus{border-color:rgba(16,217,124,.45);background:rgba(16,217,124,.04);box-shadow:0 0 0 3px rgba(16,217,124,.09)}
+.input-wrap:focus-within .input-pre{color:var(--em)}
+
+.row{display:flex;gap:10px;align-items:flex-end}
+.row .field{flex:1;margin-bottom:0}
+.forgot{display:flex;justify-content:flex-end;margin-top:-8px;margin-bottom:16px}
+.forgot a{font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s}.forgot a:hover{color:var(--em)}
+
+/* BUTTONS */
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s,box-shadow .2s,filter .2s}
+.btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .15s}
+.btn:hover::before{background:rgba(255,255,255,.07)}.btn:active{transform:scale(.98)}
+.btn-em{background:linear-gradient(135deg,var(--em),#06b6d4);color:#040a10;box-shadow:0 4px 22px rgba(16,217,124,.28)}
+.btn-em:hover{box-shadow:0 6px 32px rgba(16,217,124,.42);filter:brightness(1.06)}
+.btn-outline{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);margin-top:0}
+.btn-outline:hover{border-color:rgba(255,255,255,.2)}
+
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:13px;width:100%;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:10px;transition:background .2s,border-color .2s,transform .15s}
+.btn-google:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.18);transform:translateY(-1px)}
+.g-icon{width:20px;height:20px;flex-shrink:0}
+
+.divider{display:flex;align-items:center;gap:12px;margin:18px 0;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.streak{display:flex;align-items:center;gap:12px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:14px 16px;margin-top:16px;animation:streakSlide .5s cubic-bezier(.22,.68,0,1.2) 1.2s both}
+@keyframes streakSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.streak-icon{font-size:22px;flex-shrink:0}
+.streak-text{font-size:13px;line-height:1.5}.streak-text strong{color:var(--amber);font-weight:700}
+
+.status{display:none;margin-top:14px;padding:11px 15px;border-radius:8px;font-size:13px;font-weight:500}
+.status.show{display:block}
+.status.success{background:rgba(16,217,124,.1);border:1px solid rgba(16,217,124,.25);color:var(--em)}
+.status.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171}
+
+#recaptcha-container{margin-top:14px}
+
+.security-strip{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 36px;border-top:1px solid var(--border);background:rgba(0,0,0,.2)}
+.sec-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.sec-item svg{color:var(--em);flex-shrink:0}
+
+@media(max-width:960px){.page{flex-direction:column;padding:90px 24px 48px;gap:40px}.auth-panel{width:100%;max-width:480px;align-self:center}}
+@media(max-width:600px){nav{padding:0 20px}.nav-links{display:none}.panel{padding:24px 22px 28px}.security-strip{gap:12px;padding:12px 22px;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<div class="bg-scene">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-mark">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="white" opacity=".9"/>
+        <path d="M9 12l2 2 4-4" stroke="#040a10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    ShieldNet
+  </a>
+  <div class="nav-links">
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <button class="nav-cta">Get Started</button>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- HERO LEFT -->
+  <div class="hero">
+    <div class="hero-pill">
+      <span class="dot"></span>
+      AI-Powered Security
+    </div>
+    <h1 class="hero-title">
+      <span class="line1">Protect Smarter,</span>
+      <span class="line2">Stay Safe Always</span>
+    </h1>
+    <p class="hero-sub">
+      Your intelligent threat shield adapts in real time. Monitor, detect, and neutralize risks — protecting what matters most, 24/7.
+    </p>
+    <div class="stats">
+      <div class="stat-card">
+        <span class="stat-tag">SH</span>
+        <div>
+          <div class="stat-val" id="s1">0</div>
+          <div class="stat-label">Protected Users</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-tag">TH</span>
+        <div>
+          <div class="stat-val" id="s2">0</div>
+          <div class="stat-label">Threats Blocked</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-tag">UP</span>
+        <div>
+          <div class="stat-val">99.9%</div>
+          <div class="stat-label">Uptime SLA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH RIGHT -->
+  <div class="auth-panel">
+    <div class="card">
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchMainTab('login',this)"><span class="tab-pre">IN</span>Sign In</button>
+        <button class="tab" onclick="switchMainTab('signup',this)"><span class="tab-pre">UP</span>Create Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="panel-login" class="panel active">
+        <div class="panel-heading">Welcome Back</div>
+        <p class="panel-sub">Sign in to continue your secure session</p>
+
+        <div class="method-tabs">
+          <button class="method-btn active" onclick="switchMethod('email',this)">Email</button>
+          <button class="method-btn" onclick="switchMethod('phone',this)">Phone / OTP</button>
+        </div>
+
+        <!-- Email method -->
+        <div id="method-email" class="method-panel active">
+          <div class="field">
+            <label>Email Address</label>
+            <div class="input-wrap">
+              <span class="input-pre" style="font-size:14px">@</span>
+              <input type="email" id="loginEmail" placeholder="you@shieldnet.com" autocomplete="email"/>
+            </div>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <div class="input-wrap">
+              <span class="input-pre">PW</span>
+              <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
+            </div>
+          </div>
+          <div class="forgot"><a href="#">Forgot password?</a></div>
+          <button class="btn btn-em" onclick="doLogin()">Sign In</button>
+        </div>
+
+        <!-- Phone method -->
+        <div id="method-phone" class="method-panel">
+          <div class="row" style="margin-bottom:16px">
+            <div class="field">
+              <label>Phone Number</label>
+              <div class="input-wrap">
+                <span class="input-pre">PH</span>
+                <input type="tel" id="phoneNumber" placeholder="+91XXXXXXXXXX"/>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="width:auto;padding:13px 16px;font-size:12px;letter-spacing:.04em" onclick="doSendOtp()">Send OTP</button>
+          </div>
+          <div class="field">
+            <label>One-Time Password</label>
+            <div class="input-wrap">
+              <span class="input-pre">OT</span>
+              <input type="text" id="otpCode" placeholder="6-digit code" maxlength="6"/>
+            </div>
+          </div>
+          <button class="btn btn-em" onclick="doVerifyOtp()">Verify &amp; Sign In</button>
+          <div id="recaptcha-container"></div>
+        </div>
+
+        <div class="divider">or</div>
+        <button class="btn-google">
+          <svg class="g-icon" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.2 30.3 0 24 0 14.7 0 6.8 5.4 2.9 13.3l7.8 6c1.8-5.4 6.9-9.8 13.3-9.8z"/>
+            <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.2-10 7.2-17z"/>
+            <path fill="#FBBC05" d="M10.7 28.7A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.7-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.4 10.7l8.3-6z"/>
+            <path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.6l-7.5-5.8c-2.1 1.4-4.8 2.3-8 2.3-6.3 0-11.6-4.3-13.5-10l-8.3 6.1C6.8 42.6 14.7 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <div class="streak">
+          <span class="streak-icon">🛡️</span>
+          <div class="streak-text">
+            <strong>14-day protection streak</strong> active. Log in daily to keep your shield alive.
+          </div>
+        </div>
+
+        <div id="login-status" class="status"></div>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="panel-signup" class="panel">
+        <div class="panel-heading">Create Account</div>
+        <p class="panel-sub">Join 50K+ users protected by ShieldNet</p>
+
+        <div class="field">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <span class="input-pre" style="font-size:14px">@</span>
+            <input type="email" id="signupEmail" placeholder="you@shieldnet.com" autocomplete="email"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <div class="input-wrap">
+            <span class="input-pre">PW</span>
+            <input type="password" id="signupPassword" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+          </div>
+        </div>
+
+        <div style="margin-top:-8px;margin-bottom:18px">
+          <div style="height:3px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div id="strength-bar" style="height:100%;width:0;border-radius:3px;transition:width .4s,background .4s"></div>
+          </div>
+          <div id="strength-label" style="font-size:11px;color:var(--muted);margin-top:5px;text-align:right"></div>
+        </div>
+
+        <button class="btn btn-em" onclick="doSignup()">Create Account</button>
+
+        <div class="divider">or</div>
+
+        <button class="btn-google">
+          <svg class="g-icon" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.2 30.3 0 24 0 14.7 0 6.8 5.4 2.9 13.3l7.8 6c1.8-5.4 6.9-9.8 13.3-9.8z"/>
+            <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.2-10 7.2-17z"/>
+            <path fill="#FBBC05" d="M10.7 28.7A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.7-4.7l-7.8-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.4 10.7l8.3-6z"/>
+            <path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.6l-7.5-5.8c-2.1 1.4-4.8 2.3-8 2.3-6.3 0-11.6-4.3-13.5-10l-8.3 6.1C6.8 42.6 14.7 48 24 48z"/>
+          </svg>
+          Sign Up with Google
+        </button>
+
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6">
+          By creating an account you agree to our <a href="#" style="color:var(--em);text-decoration:none">Terms</a> and <a href="#" style="color:var(--em);text-decoration:none">Privacy Policy</a>.
+        </p>
+
+        <div id="signup-status" class="status"></div>
+      </div>
+
+      <!-- Security strip -->
+      <div class="security-strip">
+        <div class="sec-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
+          AES-256
+        </div>
+        <div class="sec-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          MFA Ready
+        </div>
+        <div class="sec-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          SOC 2 Type II
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPhoneNumber, RecaptchaVerifier }
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyAEVc0RJ3doiWWDk6XIMCubF47fMKldkuw",
+  authDomain:"shieldnet-web-app.firebaseapp.com",
+  projectId:"shieldnet-web-app",
+  storageBucket:"shieldnet-web-app.firebasestorage.app",
+  messagingSenderId:"831990307810",
+  appId:"1:831990307810:web:0a559e4c315fc043b037bb"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+function showStatus(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className='status show '+type}
+
+window.switchMainTab=(tab,btn)=>{
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('panel-'+tab).classList.add('active');
+};
+
+window.switchMethod=(m,btn)=>{
+  document.querySelectorAll('.method-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.method-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('method-'+m).classList.add('active');
+};
+
+window.checkStrength=(v)=>{
+  const bar=document.getElementById('strength-bar'),lbl=document.getElementById('strength-label');
+  let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const w=['0%','25%','50%','75%','100%'],c=['transparent','#ef4444','#f59e0b','#3b82f6','#10d97c'],l=['','Weak','Fair','Good','Strong'];
+  bar.style.width=w[s];bar.style.background=c[s];lbl.textContent=l[s];lbl.style.color=c[s];
+};
+
+window.doSignup=()=>{
+  createUserWithEmailAndPassword(auth,document.getElementById('signupEmail').value,document.getElementById('signupPassword').value)
+    .then((cred)=>{
+      // New user → always go to profile setup
+      showStatus('signup-status','✓ Account created! Setting up your profile…','success');
+      setTimeout(()=>window.location.href='setup.html',900);
+    })
+    .catch(e=>showStatus('signup-status',e.message,'error'));
+};
+
+window.doLogin=()=>{
+  signInWithEmailAndPassword(auth,document.getElementById('loginEmail').value,document.getElementById('loginPassword').value)
+    .then(()=>{showStatus('login-status','✓ Authenticated! Redirecting…','success');setTimeout(()=>window.location.href='dashboard.html',900);})
+    .catch(e=>showStatus('login-status',e.message,'error'));
+};
+
+window.recaptchaVerifier=new RecaptchaVerifier(auth,'recaptcha-container',{size:'normal'});
+
+window.doSendOtp=()=>{
+  signInWithPhoneNumber(auth,document.getElementById('phoneNumber').value,window.recaptchaVerifier)
+    .then(r=>{window.confirmationResult=r;showStatus('login-status','✓ OTP sent!','success');})
+    .catch(e=>showStatus('login-status',e.message,'error'));
+};
+
+window.doVerifyOtp=()=>{
+  if(!window.confirmationResult){showStatus('login-status','Please send OTP first.','error');return}
+  window.confirmationResult.confirm(document.getElementById('otpCode').value)
+    .then(()=>{showStatus('login-status','✓ Verified! Loading dashboard…','success');setTimeout(()=>window.location.href='dashboard.html',900);})
+    .catch(()=>showStatus('login-status','Invalid OTP. Try again.','error'));
+};
+</script>
+
+<script>
+/* PARTICLES */
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<30;i++){
+    const d=document.createElement('div');d.className='particle';
+    const sz=Math.random()*3+1;
+    d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${Math.random()*20+15}s;animation-delay:-${Math.random()*20}s`;
+    c.appendChild(d);
+  }
+})();
+
+/* STAT COUNTERS */
+(function(){
+  const counters=[
+    {el:document.getElementById('s1'),target:50,suffix:'K+'},
+    {el:document.getElementById('s2'),target:2,suffix:'M+'},
+  ];
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting)return;
+      const item=counters.find(c=>c.el===e.target);
+      if(!item)return;
+      let count=0;const inc=item.target/40;
+      const t=setInterval(()=>{
+        count=Math.min(count+inc,item.target);
+        item.el.textContent=Math.round(count)+item.suffix;
+        if(count>=item.target)clearInterval(t);
+      },40);
+      obs.unobserve(e.target);
+    });
+  },{threshold:.5});
+  counters.forEach(c=>obs.observe(c.el));
+})();
+</script>
+</body>
+</html>

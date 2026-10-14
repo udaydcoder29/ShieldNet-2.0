@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ShieldNet — Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04080f;--bg2:#070e1c;--surface:rgba(255,255,255,0.035);
+  --border:rgba(255,255,255,0.07);--border-s:rgba(255,255,255,0.04);
+  --text:#dde4ef;--muted:#4a5c72;--bright:#fff;
+  --em:#0fe87e;--red:#f87171;--amber:#fbbf24;--blue:#60a5fa;
+}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:28px 24px 48px}
+
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.025}
+
+.wrap{position:relative;z-index:2;max-width:720px;margin:0 auto}
+
+/* HEADER */
+.hdr{margin-bottom:36px;animation:fsu .6s ease both}
+.hdr-over{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--em);margin-bottom:14px}
+.ol{width:24px;height:1px;background:linear-gradient(to right,transparent,var(--em))}
+.hdr h1{font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:900;color:var(--bright);letter-spacing:-1px;line-height:1.1;margin-bottom:8px}
+.hdr h1 em{font-style:italic;background:linear-gradient(135deg,var(--em),#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr p{font-size:14px;font-weight:300;color:var(--muted);line-height:1.7}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:22px;animation:fsu .6s ease .1s both}
+.tab{flex:1;padding:11px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.tab:hover{border-color:rgba(255,255,255,.12);color:var(--bright)}
+.tab.on{border-color:var(--em);background:rgba(15,232,126,.08);color:var(--em)}
+.tab-dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.6}
+
+/* INPUT CARD */
+.input-card{background:rgba(6,12,22,.9);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:18px;backdrop-filter:blur(16px);animation:fsu .6s ease .15s both;transition:border-color .3s}
+.input-card:focus-within{border-color:rgba(15,232,126,.25)}
+.ic-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.ic-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.inp-row{display:flex;gap:10px;margin-bottom:16px}
+.inp{flex:1;padding:13px 16px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;color:var(--bright);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.inp:focus{border-color:rgba(15,232,126,.4);box-shadow:0 0 0 3px rgba(15,232,126,.07)}
+.inp::placeholder{color:var(--muted)}
+
+.scan-btn{padding:13px 28px;background:linear-gradient(135deg,var(--em),#06b6d4);color:#030a06;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;border-radius:12px;cursor:pointer;white-space:nowrap;position:relative;overflow:hidden;transition:filter .2s,transform .15s,box-shadow .2s;box-shadow:0 4px 20px rgba(15,232,126,.25)}
+.scan-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);transition:transform .5s}
+.scan-btn:not(:disabled):hover::before{transform:translateX(100%)}
+.scan-btn:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 28px rgba(15,232,126,.38)}
+.scan-btn:active{transform:scale(.97)}
+.scan-btn:disabled{opacity:.45;cursor:not-allowed;transform:none !important}
+
+/* EXAMPLES */
+.ex-label{font-size:11px;color:var(--muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em}
+.ex-row{display:flex;flex-wrap:wrap;gap:6px}
+.ex{padding:5px 13px;border-radius:20px;font-size:11.5px;border:1px solid var(--border-s);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;transition:all .18s;font-family:'JetBrains Mono',monospace}
+.ex:hover{border-color:rgba(15,232,126,.3);color:var(--em);background:rgba(15,232,126,.05)}
+
+/* RESULT CARD */
+.result-card{background:rgba(6,12,22,.95);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:20px;backdrop-filter:blur(16px);display:none;animation:fsu .5s ease both}
+.result-card.show{display:block}
+
+/* Loading */
+.loading-state{padding:32px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.scan-anim{width:64px;height:64px;position:relative}
+.scan-ring{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--em);animation:spin .9s linear infinite}
+.scan-ring2{position:absolute;inset:6px;border-radius:50%;border:2px solid transparent;border-top-color:rgba(15,232,126,.4);animation:spin 1.4s linear infinite reverse}
+.scan-core{position:absolute;inset:14px;border-radius:50%;background:rgba(15,232,126,.1);display:flex;align-items:center;justify-content:center;font-size:16px}
+.loading-txt{font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.05em}
+.loading-sub{font-size:11px;color:var(--muted);opacity:.6;font-family:'JetBrains Mono',monospace}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Verdict banner */
+.verdict-banner{padding:24px 24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px}
+.v-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.v-safe .v-icon{background:rgba(15,232,126,.12);border:1px solid rgba(15,232,126,.25)}
+.v-warning .v-icon{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25)}
+.v-danger .v-icon{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25)}
+.v-label{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;letter-spacing:-.5px}
+.v-safe .v-label{color:var(--em)}
+.v-warning .v-label{color:var(--amber)}
+.v-danger .v-label{color:var(--red)}
+.v-sub{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.5}
+.v-badge{margin-left:auto;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px}
+.v-safe .v-badge{background:rgba(15,232,126,.1);color:var(--em);border:1px solid rgba(15,232,126,.2)}
+.v-warning .v-badge{background:rgba(251,191,36,.1);color:var(--amber);border:1px solid rgba(251,191,36,.2)}
+.v-danger .v-badge{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+
+/* Risk meter */
+.risk-section{padding:20px 24px;border-bottom:1px solid var(--border)}
+.risk-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.risk-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.risk-pct{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+.risk-track{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;position:relative}
+.risk-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.22,.68,0,1.2),background .5s}
+/* Segmented ticks */
+.risk-ticks{display:flex;justify-content:space-between;margin-top:6px}
+.risk-tick{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
+
+/* Details */
+.details-section{padding:20px 24px}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.det-box{background:rgba(255,255,255,.03);border:1px solid var(--border-s);border-radius:12px;padding:14px}
+.det-box-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.det-box-val{font-size:13px;color:var(--text);line-height:1.6}
+.det-full{background:rgba(255,255,255,.03);border:1px solid var(--border-s);border-radius:12px;padding:14px;margin-bottom:12px}
+.det-full-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.det-full-body{font-size:13px;color:var(--text);line-height:1.75}
+.det-full-body b{color:var(--bright)}
+
+/* Tips */
+.tips-section{padding:0 24px 24px}
+.tips-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.tip-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-s);font-size:13px;color:var(--text);line-height:1.6}
+.tip-item:last-child{border-bottom:none}
+.tip-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--em);flex-shrink:0;margin-top:1px;font-weight:500}
+
+/* HISTORY */
+.hist-section{animation:fsu .5s ease both}
+.hist-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.hist-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.hist-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(6,12,22,.8);border:1px solid var(--border-s);border-radius:12px;margin-bottom:7px;cursor:pointer;transition:border-color .2s,background .2s}
+.hist-item:hover{border-color:var(--border);background:rgba(255,255,255,.03)}
+.hist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hist-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-verd{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;flex-shrink:0}
+.hist-time{font-size:10px;color:var(--muted);flex-shrink:0}
+
+@keyframes fsu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:500px){.det-grid{grid-template-columns:1fr}.inp-row{flex-direction:column}.scan-btn{width:100%}}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<div class="wrap">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-over"><span class="ol"></span>ShieldNet Scanner</div>
+    <h1>Scan any <em>link or number</em></h1>
+    <p>Paste a suspicious URL or mobile number — Gemini AI will give you an honest, accurate threat assessment.</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab on" id="tab-link" onclick="switchTab('link',this)">
+      <span class="tab-dot"></span> 🌐 Suspicious Link
+    </div>
+    <div class="tab" id="tab-number" onclick="switchTab('number',this)">
+      <span class="tab-dot"></span> 📱 Mobile Number
+    </div>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="input-card">
+    <div class="ic-label" id="icLabel">Enter URL to scan</div>
+    <div class="inp-row">
+      <input class="inp" id="scanInp" placeholder="https://example.com" onkeydown="if(event.key==='Enter')doScan()"/>
+      <button class="scan-btn" id="scanBtn" onclick="doScan()">🔍 Scan</button>
+    </div>
+    <div class="ex-label">// try an example</div>
+    <div class="ex-row" id="exRow">
+      <div class="ex" onclick="useEx(this)">google.com</div>
+      <div class="ex" onclick="useEx(this)">paytm.com</div>
+      <div class="ex" onclick="useEx(this)">http://paytm-refund.xyz</div>
+      <div class="ex" onclick="useEx(this)">bit.ly/fr33prize</div>
+      <div class="ex" onclick="useEx(this)">amazon.in</div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="resultCard">
+    <!-- Loading -->
+    <div id="loadState" class="loading-state">
+      <div class="scan-anim">
+        <div class="scan-ring"></div>
+        <div class="scan-ring2"></div>
+        <div class="scan-core">🔍</div>
+      </div>
+      <div class="loading-txt">Analysing with Gemini AI...</div>
+      <div class="loading-sub">Checking domain reputation, patterns & indicators</div>
+    </div>
+    <!-- Result content -->
+    <div id="resContent" style="display:none">
+      <div class="verdict-banner" id="verdictBanner">
+        <div class="v-icon" id="vIcon"></div>
+        <div>
+          <div class="v-label" id="vLabel"></div>
+          <div class="v-sub" id="vSub"></div>
+        </div>
+        <div class="v-badge" id="vBadge"></div>
+      </div>
+      <div class="risk-section">
+        <div class="risk-row">
+          <span class="risk-label">Risk Score</span>
+          <span class="risk-pct" id="riskPct">0%</span>
+        </div>
+        <div class="risk-track"><div class="risk-fill" id="riskFill" style="width:0%"></div></div>
+        <div class="risk-ticks"><span class="risk-tick">0 Safe</span><span class="risk-tick">25</span><span class="risk-tick">50</span><span class="risk-tick">75</span><span class="risk-tick">100 Danger</span></div>
+      </div>
+      <div class="details-section">
+        <div class="det-grid" id="detGrid"></div>
+        <div class="det-full">
+          <div class="det-full-label">// Analysis</div>
+          <div class="det-full-body" id="detBody"></div>
+        </div>
+      </div>
+      <div class="tips-section">
+        <div class="tips-label">// What to do</div>
+        <div id="tipsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="histSection" style="display:none">
+    <div class="hist-label">Recent Scans</div>
+    <div id="histList"></div>
+  </div>
+</div>
+
+<script>
+// Canvas BG
+(function(){
+  const cv=document.getElementById('bgCanvas'),cx=cv.getContext('2d');
+  let W,H,ps=[];
+  function rs(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  rs();window.addEventListener('resize',rs);
+  class P{constructor(){this.re()}re(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=Math.random()*1.1+.3;this.vx=(Math.random()-.5)*.15;this.vy=(Math.random()-.5)*.15;this.a=Math.random()*.3+.04}s(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.re()}}
+  for(let i=0;i<45;i++)ps.push(new P());
+  const orbs=[{x:.1,y:.1,r:380,c:'15,232,126',a:.09},{x:.85,y:.8,r:320,c:'56,189,248',a:.07}];
+  function dr(){cx.clearRect(0,0,W,H);orbs.forEach(o=>{const g=cx.createRadialGradient(o.x*W,o.y*H,0,o.x*W,o.y*H,o.r);g.addColorStop(0,`rgba(${o.c},${o.a})`);g.addColorStop(1,`rgba(${o.c},0)`);cx.fillStyle=g;cx.beginPath();cx.ellipse(o.x*W,o.y*H,o.r,o.r*.7,0,0,Math.PI*2);cx.fill()});ps.forEach(p=>{cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(180,220,255,${p.a})`;cx.fill();p.s()});requestAnimationFrame(dr)}
+  dr();
+})();
+
+const GEMINI_KEY = 'AIzaSyBxA1PZdTXs_V4Igq7bITOWNL0njEQxTjE';
+let curTab = 'link';
+const history = [];
+
+function switchTab(tab, el) {
+  curTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  const inp = document.getElementById('scanInp');
+  const lbl = document.getElementById('icLabel');
+  const exRow = document.getElementById('exRow');
+  if (tab === 'link') {
+    inp.placeholder = 'https://example.com';
+    lbl.textContent = 'Enter URL to scan';
+    exRow.innerHTML = `
+      <div class="ex" onclick="useEx(this)">google.com</div>
+      <div class="ex" onclick="useEx(this)">paytm.com</div>
+      <div class="ex" onclick="useEx(this)">http://paytm-refund.xyz</div>
+      <div class="ex" onclick="useEx(this)">bit.ly/fr33prize</div>
+      <div class="ex" onclick="useEx(this)">amazon.in</div>`;
+  } else {
+    inp.placeholder = '+91 XXXXX XXXXX';
+    lbl.textContent = 'Enter mobile number to check';
+    exRow.innerHTML = `
+      <div class="ex" onclick="useEx(this)">+91 98765 43210</div>
+      <div class="ex" onclick="useEx(this)">+91 99999 00000</div>
+      <div class="ex" onclick="useEx(this)">1800 103 4567</div>`;
+  }
+  exRow.querySelectorAll('.ex').forEach(e => e.onclick = function(){ useEx(this) });
+  document.getElementById('resultCard').classList.remove('show');
+  inp.value = '';
+}
+
+function useEx(el) { document.getElementById('scanInp').value = el.textContent.trim(); }
+
+async function doScan() {
+  const val = document.getElementById('scanInp').value.trim();
+  if (!val) return;
+
+  const card = document.getElementById('resultCard');
+  const loadState = document.getElementById('loadState');
+  const resContent = document.getElementById('resContent');
+  const btn = document.getElementById('scanBtn');
+
+  card.classList.add('show');
+  loadState.style.display = 'flex';
+  resContent.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '⏳ Scanning...';
+
+  const isLink = curTab === 'link';
+
+  // ── IMPROVED PROMPT — unbiased, strict JSON, calibrated scoring ──
+  const prompt = isLink ? `
+You are a professional cybersecurity analyst. Your job is to assess whether a URL is safe or dangerous for Indian internet users. Be ACCURATE and UNBIASED — well-known legitimate websites like google.com, amazon.in, paytm.com, facebook.com, youtube.com, sbi.co.in MUST receive a SAFE verdict with a risk score under 15. Only flag URLs as WARNING or DANGER if there are genuine red flags.
+
+Analyse this URL: "${val}"
+
+Scoring guide:
+- 0-20: SAFE — legitimate, well-known, HTTPS, no suspicious patterns
+- 21-50: WARNING — unknown domain, unusual TLD, suspicious keywords, no HTTPS
+- 51-100: DANGER — known phishing patterns, fake brand impersonation, malicious TLD (.xyz, .tk, .ml), URL shortener hiding destination, excessive hyphens
+
+Check these factors:
+1. Is it a well-known legitimate domain? (google, amazon, facebook, youtube, sbi, hdfc, paytm etc) → SAFE
+2. Does it impersonate a real brand with slight misspelling? (amaz0n, paytml, hdfcbank-secure) → DANGER
+3. Is it a suspicious TLD (.xyz, .tk, .ml, .ga, .info combined with suspicious keywords) → WARNING/DANGER
+4. Does it have suspicious keywords? (free, prize, winner, refund, secure-update, verify-now) → WARNING/DANGER
+5. Is it a URL shortener? (bit.ly, tinyurl) → WARNING
+
+Respond ONLY in this exact JSON format with no extra text:
+{"verdict":"SAFE|WARNING|DANGER","risk":0-100,"summary":"One sentence honest verdict","whyFlags":"What specific patterns make it suspicious, or 'No suspicious patterns found' if safe","domainAge":"Unknown or estimated","httpsStatus":"Yes/No/Unknown","analysis":"2-3 sentences detailed analysis","tips":["tip1","tip2","tip3"]}
+` : `
+You are a professional cybersecurity analyst assessing mobile numbers for scam risk in India. Be ACCURATE — legitimate business numbers, known helplines (1800 xxx xxxx), and normal mobile numbers should NOT be flagged as dangerous without genuine reason.
+
+Analyse this number: "${val}"
+
+Scoring guide:
+- 0-20: SAFE — known business helpline, normal mobile number with no reports
+- 21-50: WARNING — unusual pattern, international prefix with suspicious context
+- 51-100: DANGER — known scam pattern, premium rate number, spoofed number patterns
+
+Respond ONLY in this exact JSON format with no extra text:
+{"verdict":"SAFE|WARNING|DANGER","risk":0-100,"summary":"One sentence honest verdict","numberType":"Mobile/Landline/Toll-free/Premium/Unknown","location":"Estimated location if detectable or Unknown","analysis":"2-3 sentences detailed analysis","tips":["tip1","tip2","tip3"]}
+`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 700, responseMimeType: 'application/json' }
+        })
+      }
+    );
+    const data = await res.json();
+    let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Strip markdown code fences that Gemini 2.5 adds (```json ... ```)
+    raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    // Extract JSON object
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    let parsed;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+      // Make sure risk is actually a number, not a string like "0-20"
+      if (typeof parsed.risk === 'string') {
+        const nums = parsed.risk.match(/\d+/g);
+        parsed.risk = nums ? parseInt(nums[0]) : 50;
+      }
+    } catch(e) {
+      // Last resort — try to extract values manually from raw text
+      const vMatch = raw.match(/"verdict"\s*:\s*"(SAFE|WARNING|DANGER)"/i);
+      const rMatch = raw.match(/"risk"\s*:\s*(\d+)/);
+      const sMatch = raw.match(/"summary"\s*:\s*"([^"]+)"/);
+      parsed = {
+        verdict: vMatch ? vMatch[1].toUpperCase() : 'WARNING',
+        risk: rMatch ? parseInt(rMatch[1]) : 50,
+        summary: sMatch ? sMatch[1] : 'Could not fully parse response.',
+        analysis: raw.slice(0, 300),
+        tips: ['Proceed with caution.', 'Do not share personal information.', 'When in doubt, do not click.']
+      };
+    }
+
+    loadState.style.display = 'none';
+    resContent.style.display = 'block';
+
+    const v = (parsed.verdict || 'WARNING').toUpperCase();
+    const risk = Math.min(100, Math.max(0, parseInt(parsed.risk) || 50));
+    const cls = v === 'SAFE' ? 'v-safe' : v === 'DANGER' ? 'v-danger' : 'v-warning';
+    const icon = v === 'SAFE' ? '✅' : v === 'DANGER' ? '🚨' : '⚠️';
+    const col = v === 'SAFE' ? '#0fe87e' : v === 'DANGER' ? '#f87171' : '#fbbf24';
+    const gradCol = v === 'SAFE' ? '#0fe87e, #06b6d4' : v === 'DANGER' ? '#f87171, #fb923c' : '#fbbf24, #fb923c';
+
+    // Verdict banner
+    const banner = document.getElementById('verdictBanner');
+    banner.className = 'verdict-banner ' + cls;
+    document.getElementById('vIcon').textContent = icon;
+    document.getElementById('vLabel').textContent = v;
+    document.getElementById('vSub').textContent = parsed.summary || '';
+    document.getElementById('vBadge').textContent = 'Risk: ' + risk + '%';
+
+    // Risk bar
+    document.getElementById('riskPct').textContent = risk + '%';
+    document.getElementById('riskPct').style.color = col;
+    const fill = document.getElementById('riskFill');
+    fill.style.background = `linear-gradient(to right, ${gradCol})`;
+    setTimeout(() => fill.style.width = risk + '%', 80);
+
+    // Detail grid
+    const detGrid = document.getElementById('detGrid');
+    if (isLink) {
+      detGrid.innerHTML = `
+        <div class="det-box">
+          <div class="det-box-label">// HTTPS</div>
+          <div class="det-box-val">${parsed.httpsStatus || 'Unknown'}</div>
+        </div>
+        <div class="det-box">
+          <div class="det-box-label">// Domain Age</div>
+          <div class="det-box-val">${parsed.domainAge || 'Unknown'}</div>
+        </div>
+        <div class="det-box" style="grid-column:1/-1">
+          <div class="det-box-label">// Red Flags</div>
+          <div class="det-box-val">${parsed.whyFlags || 'None detected'}</div>
+        </div>`;
+    } else {
+      detGrid.innerHTML = `
+        <div class="det-box">
+          <div class="det-box-label">// Number Type</div>
+          <div class="det-box-val">${parsed.numberType || 'Unknown'}</div>
+        </div>
+        <div class="det-box">
+          <div class="det-box-label">// Location</div>
+          <div class="det-box-val">${parsed.location || 'Unknown'}</div>
+        </div>`;
+    }
+
+    // Analysis
+    document.getElementById('detBody').innerHTML = (parsed.analysis || '').replace(/\n/g, '<br>');
+
+    // Tips
+    const tips = Array.isArray(parsed.tips) ? parsed.tips : ['Proceed with caution.'];
+    document.getElementById('tipsList').innerHTML = tips.map((t, i) =>
+      `<div class="tip-item"><span class="tip-num">0${i+1}</span>${t}</div>`
+    ).join('');
+
+    // History
+    history.unshift({ val, verdict: v, col, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+    renderHistory();
+
+  } catch(e) {
+    loadState.style.display = 'none';
+    resContent.style.display = 'block';
+    document.getElementById('verdictBanner').innerHTML = `<div style="color:var(--red);padding:8px">⚠️ Error: ${e.message}. Check your Gemini API key.</div>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '🔍 Scan';
+}
+
+function renderHistory() {
+  const sec = document.getElementById('histSection');
+  const list = document.getElementById('histList');
+  if (!history.length) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  list.innerHTML = history.slice(0, 6).map(h => `
+    <div class="hist-item" onclick="document.getElementById('scanInp').value='${h.val}'">
+      <div class="hist-dot" style="background:${h.col}"></div>
+      <div class="hist-val">${h.val}</div>
+      <div class="hist-verd" style="color:${h.col}">${h.verdict}</div>
+      <div class="hist-time">${h.time}</div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

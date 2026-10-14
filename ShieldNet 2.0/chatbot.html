@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ShieldNet — AI Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04080f;--surface:rgba(255,255,255,0.032);--border:rgba(255,255,255,0.065);
+  --border-s:rgba(255,255,255,0.038);--text:#dde4ef;--muted:#4a5c72;--bright:#ffffff;
+  --em:#0fe87e;--em-dim:rgba(15,232,126,0.12);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column}
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:0.028}
+#sel{position:relative;z-index:10;flex:1;display:flex;flex-direction:column;align-items:center;padding:0 20px 32px;overflow-y:auto}
+.s-hero{text-align:center;padding:48px 20px 36px;max-width:580px;width:100%}
+.s-over{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--em);margin-bottom:22px;opacity:0;animation:fsu .6s ease .1s both}
+.ol{width:28px;height:1px;background:linear-gradient(to right,transparent,var(--em))}
+.olr{background:linear-gradient(to left,transparent,var(--em))}
+.s-title{font-family:'Playfair Display',serif;font-size:clamp(32px,5.5vw,58px);font-weight:900;line-height:1.06;letter-spacing:-1.5px;color:var(--bright);margin-bottom:14px;opacity:0;animation:fsu .7s ease .2s both}
+.s-title em{font-style:italic;background:linear-gradient(135deg,var(--em),#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.s-sub{font-size:14px;font-weight:300;color:var(--muted);line-height:1.75;max-width:400px;margin:0 auto;opacity:0;animation:fsu .7s ease .3s both}
+.char-stage{width:100%;max-width:840px;opacity:0;animation:fsu .8s ease .45s both;margin-bottom:34px}
+.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.cc{position:relative;background:rgba(6,12,22,.88);border:1px solid var(--border);border-radius:20px;padding:26px 18px 20px;cursor:pointer;text-align:center;overflow:hidden;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:transform .3s cubic-bezier(.22,.68,0,1.4),border-color .25s,box-shadow .3s}
+.cc::before{content:'';position:absolute;inset:0;border-radius:20px;background:radial-gradient(ellipse 70% 60% at 50% -10%,var(--c,var(--em)),transparent 70%);opacity:0;transition:opacity .35s}
+.cc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c,var(--em)),transparent);opacity:0;transition:opacity .3s}
+.cc:hover{transform:translateY(-6px);border-color:var(--c,var(--em));box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px var(--c,var(--em)) inset}
+.cc:hover::before{opacity:.09}.cc:hover::after{opacity:1}
+.cc.sel{border-color:var(--c,var(--em));box-shadow:0 0 0 2px var(--c,var(--em)),0 24px 60px rgba(0,0,0,.7);transform:translateY(-4px)}
+.cc.sel::before{opacity:.12}.cc.sel::after{opacity:1}
+.cc-chk{position:absolute;top:12px;right:12px;z-index:2;width:22px;height:22px;border-radius:50%;background:var(--c,var(--em));color:#030a06;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0) rotate(-45deg);transition:opacity .25s,transform .35s cubic-bezier(.22,.68,0,1.6)}
+.cc.sel .cc-chk{opacity:1;transform:scale(1) rotate(0)}
+.cc-av{width:74px;height:74px;border-radius:50%;margin:0 auto 15px;border:2px solid rgba(255,255,255,.07);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;z-index:1;transition:transform .35s cubic-bezier(.22,.68,0,1.5),box-shadow .3s}
+.cc:hover .cc-av{transform:scale(1.1) rotate(-4deg);box-shadow:0 0 24px var(--c,var(--em))}
+.cc.sel .cc-av{box-shadow:0 0 30px var(--c,var(--em))}
+.cc-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--bright);margin-bottom:3px;position:relative;z-index:1}
+.cc-lang{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--c,var(--em));background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);padding:3px 10px;border-radius:20px;margin-bottom:10px;position:relative;z-index:1}
+.cc-desc{font-size:11.5px;font-weight:300;color:var(--muted);line-height:1.65;position:relative;z-index:1}
+.cc-traits{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin-top:11px;position:relative;z-index:1}
+.cc-t{font-size:10px;font-weight:500;padding:3px 9px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted)}
+.s-cta{display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0;animation:fsu .7s ease .62s both}
+.start-btn{position:relative;overflow:hidden;padding:15px 50px;background:var(--em);color:#030a06;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:none;border-radius:14px;cursor:pointer;box-shadow:0 6px 32px rgba(15,232,126,.28);transition:box-shadow .25s,transform .15s,filter .2s,opacity .3s}
+.start-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);transition:transform .5s ease}
+.start-btn:not(:disabled):hover::before{transform:translateX(100%)}
+.start-btn:not(:disabled):hover{box-shadow:0 8px 40px rgba(15,232,126,.42);filter:brightness(1.06);transform:translateY(-2px)}
+.start-btn:active{transform:scale(.97)}
+.start-btn:disabled{opacity:.3;cursor:not-allowed;transform:none !important;box-shadow:none}
+.s-hint{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.05em;transition:color .3s}
+@keyframes fsu{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+#chat{display:none;flex:1;flex-direction:column;height:100%;position:relative;z-index:10}
+#chat.on{display:flex;animation:fsu .4s ease both}
+.ctb{height:60px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 13px;background:rgba(4,8,15,.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.back-btn{width:33px;height:33px;border-radius:9px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s;flex-shrink:0}
+.back-btn:hover{background:rgba(255,255,255,.08);color:var(--bright)}
+.cpill{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.pav{width:35px;height:35px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid var(--border);transition:box-shadow .3s}
+.pav.spk{animation:avb .35s ease infinite alternate;box-shadow:0 0 16px var(--cg,var(--em))}
+@keyframes avb{from{transform:scale(1)}to{transform:scale(1.1)}}
+.pi{min-width:0}
+.pn{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;margin-top:1px}
+.obadge{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--em);margin-left:8px;flex-shrink:0}
+.odot{width:6px;height:6px;border-radius:50%;background:var(--em);box-shadow:0 0 5px var(--em);animation:op 2.5s ease infinite}
+@keyframes op{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}
+.tacts{display:flex;gap:6px;margin-left:auto;flex-shrink:0}
+.tbtn{height:32px;padding:0 12px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap}
+.tbtn:hover{background:rgba(255,255,255,.07);color:var(--bright);border-color:rgba(255,255,255,.14)}
+.tbtn.em{color:var(--em);border-color:rgba(15,232,126,.22);background:rgba(15,232,126,.06)}
+.tbtn.em:hover{background:rgba(15,232,126,.12)}
+.tbtn.danger:hover{color:#f87171;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.07)}
+.mwrap{position:relative}
+.mmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:200;background:rgba(8,14,24,.97);border:1px solid var(--border);border-radius:14px;padding:6px;min-width:192px;box-shadow:0 20px 50px rgba(0,0,0,.7);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:opacity .2s,transform .2s}
+.mmenu.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+.mi{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;transition:background .15s,color .15s}
+.mi:hover{background:rgba(255,255,255,.05);color:var(--bright)}
+.mi.danger:hover{background:rgba(248,113,113,.08);color:#f87171}
+.mi.em{color:var(--em)}
+.mi.em:hover{background:rgba(15,232,126,.07)}
+.msep{height:1px;background:var(--border);margin:5px 0}
+.mi-ic{font-size:15px;width:20px;text-align:center}
+.sdrw{position:absolute;top:60px;right:0;bottom:0;z-index:100;width:285px;background:rgba(4,8,15,.97);border-left:1px solid var(--border);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.22,.68,0,1.2)}
+.sdrw.open{transform:translateX(0)}
+.dh{padding:15px 15px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.dt{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--bright);display:flex;align-items:center;gap:7px}
+.dc{width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
+.dc:hover{background:rgba(255,255,255,.07);color:var(--bright)}
+.db{flex:1;overflow-y:auto;padding:10px}
+.si{display:flex;align-items:flex-start;gap:9px;padding:11px 10px;background:var(--surface);border:1px solid var(--border-s);border-radius:11px;margin-bottom:7px;cursor:pointer;transition:border-color .2s,background .2s}
+.si:hover{border-color:var(--border);background:rgba(255,255,255,.04)}
+.sav{font-size:22px;flex-shrink:0;width:35px;height:35px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid var(--border-s)}
+.sinfo{flex:1;min-width:0}
+.sname{font-size:12px;font-weight:600;color:var(--bright);margin-bottom:2px}
+.sprev{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stime{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px}
+.delbtn{width:24px;height:24px;border-radius:6px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,color .15s}
+.delbtn:hover{background:rgba(248,113,113,.1);color:#f87171}
+.dempty{padding:44px 20px;text-align:center}
+.dei{font-size:34px;margin-bottom:12px;opacity:.5}
+.det{font-size:13px;color:var(--muted);line-height:1.7}
+.dim{position:absolute;inset:0;z-index:90;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s}
+.dim.show{background:rgba(0,0,0,.35);pointer-events:all}
+.cbody{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.cbody::-webkit-scrollbar{width:3px}
+.cbody::-webkit-scrollbar-thumb{background:rgba(255,255,255,.06);border-radius:2px}
+.dpill{text-align:center;margin:6px 0}
+.dpill span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.035);padding:4px 13px;border-radius:20px;border:1px solid var(--border-s)}
+.mr{display:flex;gap:8px;max-width:80%;animation:mi .28s cubic-bezier(.22,.68,0,1.3) both}
+@keyframes mi{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.mr.bot{align-self:flex-start}
+.mr.user{align-self:flex-end;flex-direction:row-reverse}
+.mav{width:32px;height:32px;border-radius:9px;flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid var(--border-s)}
+.bc{display:flex;flex-direction:column;gap:3px;max-width:100%}
+.user .bc{align-items:flex-end}
+.bub{padding:10px 14px;font-size:13.5px;line-height:1.68;word-break:break-word;border-radius:14px}
+.bot .bub{background:rgba(255,255,255,.045);border:1px solid var(--border-s);border-bottom-left-radius:4px;color:var(--text)}
+.user .bub{background:rgba(15,232,126,.1);border:1px solid rgba(15,232,126,.18);border-bottom-right-radius:4px;color:var(--bright)}
+.bmeta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.btime{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);padding:0 2px}
+.bb{display:inline-flex;align-items:center;gap:4px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;cursor:pointer;border:1px solid var(--border-s);background:var(--surface);color:var(--muted);transition:all .18s}
+.bb:hover{color:var(--bright);border-color:var(--border);background:rgba(255,255,255,.06)}
+.bb.tts{color:var(--em);border-color:rgba(15,232,126,.2);background:rgba(15,232,126,.05)}
+.bb.tts:hover,.bb.tts.on{background:rgba(15,232,126,.12)}
+.bb.tts.on{color:#f87171;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.06)}
+.trow{display:flex;gap:8px;align-self:flex-start;animation:mi .28s ease both}
+.tbub{padding:12px 16px;border-radius:14px;border-bottom-left-radius:4px;background:rgba(255,255,255,.04);border:1px solid var(--border-s);display:flex;gap:5px;align-items:center}
+.td{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:tb 1.2s ease infinite}
+.td:nth-child(2){animation-delay:.16s}
+.td:nth-child(3){animation-delay:.32s}
+@keyframes tb{0%,80%,100%{transform:translateY(0);opacity:.3}40%{transform:translateY(-5px);opacity:1}}
+.sw{padding:6px 14px 2px;display:flex;flex-wrap:wrap;gap:7px}
+.sg{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:400;border:1px solid var(--border-s);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;transition:all .18s;white-space:nowrap}
+.sg:hover{border-color:var(--em);color:var(--em);transform:translateY(-1px);background:rgba(15,232,126,.05)}
+.cib{flex-shrink:0;padding:10px 12px 13px;background:rgba(4,8,15,.93);border-top:1px solid var(--border)}
+/* Attachment preview bar */
+.prev-bar{display:none;align-items:center;gap:10px;padding:8px 4px 6px;border-bottom:1px solid var(--border-s);margin-bottom:8px}
+.prev-thumb{width:40px;height:40px;border-radius:9px;object-fit:cover;border:1px solid var(--border);display:none}
+.prev-icon{font-size:22px;display:none}
+.prev-name{font-size:12px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prev-clear{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:color .15s,background .15s}
+.prev-clear:hover{color:#f87171;background:rgba(248,113,113,.1)}
+.irow{display:flex;gap:7px;align-items:flex-end}
+.micb{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.micb:hover{background:rgba(255,255,255,.07);color:var(--bright);border-color:rgba(255,255,255,.14)}
+.micb.rec{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.35);color:#f87171;animation:recpulse 1s ease infinite}
+@keyframes recpulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.3)}50%{box-shadow:0 0 0 6px rgba(248,113,113,0)}}
+.cta{flex:1;padding:10px 13px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:11px;color:var(--bright);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;max-height:110px;line-height:1.5;transition:border-color .2s,box-shadow .2s}
+.cta:focus{border-color:rgba(15,232,126,.38);box-shadow:0 0 0 3px rgba(15,232,126,.07)}
+.cta::placeholder{color:var(--muted)}
+.sendb{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--em),#38bdf8);border:none;color:#030a06;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(15,232,126,.25);transition:filter .2s,transform .15s,box-shadow .2s}
+.sendb:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 5px 20px rgba(15,232,126,.4)}
+.sendb:active{transform:scale(.94)}
+.ifoot{display:flex;align-items:center;justify-content:space-between;margin-top:7px}
+.vst{font-family:'JetBrains Mono',monospace;font-size:10px;color:#f87171;letter-spacing:.06em;display:none}
+.vst.show{display:block}
+.pow{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);letter-spacing:.05em;margin-left:auto}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(14px);z-index:999;opacity:0;pointer-events:none;background:rgba(8,15,28,.97);border:1px solid var(--border);border-radius:12px;padding:11px 18px;display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text);box-shadow:0 16px 40px rgba(0,0,0,.6);transition:opacity .28s,transform .28s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:700px){.char-grid{grid-template-columns:repeat(2,1fr)}.sdrw{width:100%;border-left:none;border-top:1px solid var(--border)}.tbtn span{display:none}.tbtn{padding:0 9px}.tacts{gap:5px}}
+@media(max-width:400px){.char-grid{grid-template-columns:1fr}.s-title{font-size:28px}}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<!-- CHARACTER SELECT -->
+<div id="sel">
+  <div class="s-hero">
+    <div class="s-over"><span class="ol"></span>ShieldNet AI Assistant<span class="ol olr"></span></div>
+    <h1 class="s-title">Choose your<br><em>Security Guide</em></h1>
+    <p class="s-sub">Each character brings a unique voice, language, and personality to help you stay safe from scams and cyber threats.</p>
+  </div>
+  <div class="char-stage">
+    <div class="char-grid" id="cg">
+      <div class="cc" data-id="arjun" style="--c:#0fe87e" onclick="pick('arjun',this)">
+        <div class="cc-chk">✓</div><div class="cc-av">🦁</div>
+        <div class="cc-name">Arjun</div><div class="cc-lang">English</div>
+        <div class="cc-desc">Sharp, professional, concise. Your go-to cyber expert for clear English guidance on scams and fraud.</div>
+        <div class="cc-traits"><span class="cc-t">🏙 Professional</span><span class="cc-t">🛡 Expert</span></div>
+      </div>
+      <div class="cc" data-id="priya" style="--c:#f59e0b" onclick="pick('priya',this)">
+        <div class="cc-chk">✓</div><div class="cc-av">🌸</div>
+        <div class="cc-name">प्रिया</div><div class="cc-lang">हिंदी</div>
+        <div class="cc-desc">आपकी विश्वसनीय साइबर सुरक्षा सहेली — सरल हिंदी में हर खतरे को समझाएंगी।</div>
+        <div class="cc-traits"><span class="cc-t">🌺 Friendly</span><span class="cc-t">💬 Hindi</span></div>
+      </div>
+      <div class="cc" data-id="meera" style="--c:#a78bfa" onclick="pick('meera',this)">
+        <div class="cc-chk">✓</div><div class="cc-av">🦚</div>
+        <div class="cc-name">मीरा</div><div class="cc-lang">मराठी</div>
+        <div class="cc-desc">तुमची सायबर सुरक्षा मार्गदर्शक — मराठीत सांगेन सर्व धोके व उपाय.</div>
+        <div class="cc-traits"><span class="cc-t">🌸 Marathi</span><span class="cc-t">🎯 Precise</span></div>
+      </div>
+      <div class="cc" data-id="vikram" style="--c:#38bdf8" onclick="pick('vikram',this)">
+        <div class="cc-chk">✓</div><div class="cc-av">🤖</div>
+        <div class="cc-name">Vikram</div><div class="cc-lang">Tech English</div>
+        <div class="cc-desc">Deep technical dives — phishing kits, malware mechanics, exploit chains explained clearly.</div>
+        <div class="cc-traits"><span class="cc-t">⚡ Technical</span><span class="cc-t">🔬 Analytical</span></div>
+      </div>
+      <div class="cc" data-id="kavya" style="--c:#fb923c" onclick="pick('kavya',this)">
+        <div class="cc-chk">✓</div><div class="cc-av">🦊</div>
+        <div class="cc-name">Kavya</div><div class="cc-lang">Casual English</div>
+        <div class="cc-desc">Zero jargon. Explains scams like your savvy friend — relatable, fast, and genuinely helpful.</div>
+        <div class="cc-traits"><span class="cc-t">✨ Friendly</span><span class="cc-t">😄 Casual</span></div>
+      </div>
+      <div class="cc" data-id="shiva" style="--c:#f472b6" onclick="pick('shiva',this)">
+        <div class="cc-chk">✓</div><div class="cc-av">🐉</div>
+        <div class="cc-name">Shiva</div><div class="cc-lang">Hinglish</div>
+        <div class="cc-desc">Hindi + English the way we actually talk. No bakwaas, seedha helpful — yaar mode on.</div>
+        <div class="cc-traits"><span class="cc-t">🔥 Hinglish</span><span class="cc-t">💪 Direct</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="s-cta">
+    <button class="start-btn" id="sb" disabled onclick="launch()">Begin Conversation →</button>
+    <div class="s-hint" id="sh">Select a guide above to continue</div>
+  </div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div id="chat">
+  <div class="ctb">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <div class="cpill">
+      <div class="pav" id="pav">🦁</div>
+      <div class="pi">
+        <div class="pn" id="pn">Arjun</div>
+        <div class="pl" id="pl" style="color:var(--em)">English</div>
+      </div>
+      <div class="obadge"><span class="odot"></span>Online</div>
+    </div>
+    <div class="tacts">
+      <button class="tbtn em" onclick="saveChat()" id="svb">💾 <span>Save</span></button>
+      <button class="tbtn" onclick="tglDrawer()">📂 <span>Saved</span></button>
+      <div class="mwrap">
+        <button class="tbtn" onclick="tglMenu(event)" id="mb">⋯</button>
+        <div class="mmenu" id="mm">
+          <div class="mi em" onclick="saveChat();closeMenu()"><span class="mi-ic">💾</span>Save This Chat</div>
+          <div class="mi" onclick="expChat();closeMenu()"><span class="mi-ic">📤</span>Export as .txt</div>
+          <div class="msep"></div>
+          <div class="mi" onclick="clrChat();closeMenu()"><span class="mi-ic">🧹</span>Clear Conversation</div>
+          <div class="mi danger" onclick="delAllSaved();closeMenu()"><span class="mi-ic">🗑️</span>Delete All Saved</div>
+          <div class="msep"></div>
+          <div class="mi" onclick="goBack();closeMenu()"><span class="mi-ic">🔄</span>Change Character</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dim" id="dim" onclick="closeDrawer()"></div>
+  <div class="sdrw" id="drw">
+    <div class="dh">
+      <div class="dt">📂 Saved Chats</div>
+      <button class="dc" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="db" id="drwb"></div>
+  </div>
+  <div class="cbody" id="cb"></div>
+  <div class="sw" id="sw"></div>
+  <div class="cib">
+    <!-- Attachment preview bar -->
+    <div class="prev-bar" id="prevBar">
+      <img class="prev-thumb" id="prevThumb" alt="preview"/>
+      <span class="prev-icon" id="prevIcon">📄</span>
+      <span class="prev-name" id="prevName"></span>
+      <button class="prev-clear" onclick="clearAttach()" title="Remove attachment">✕</button>
+    </div>
+    <!-- Input row -->
+    <div class="irow">
+      <input type="file" id="fileIn" accept="image/*,.pdf" style="display:none" onchange="handleFile(event)"/>
+      <button class="micb" onclick="document.getElementById('fileIn').click()" title="Attach image or PDF">📎</button>
+      <button class="micb" id="micb" onclick="tglVoice()" title="Voice input">🎤</button>
+      <textarea class="cta" id="cta" placeholder="Ask about any scam or threat…" rows="1" onkeydown="hk(event)" oninput="ar(this)"></textarea>
+      <button class="sendb" onclick="send()">➤</button>
+    </div>
+    <div class="ifoot">
+      <span class="vst" id="vs">● REC — speak now</span>
+      <span class="pow">Gemini AI · Voice &amp; Vision</span>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"><span id="ti">✅</span><span id="tm">Done!</span></div>
+
+<script>
+// ── Canvas BG ──
+(function(){
+  const cv=document.getElementById('bgCanvas'),cx=cv.getContext('2d');
+  let W,H,ps=[];
+  function rs(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  rs();window.addEventListener('resize',rs);
+  class P{constructor(){this.re()}re(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=Math.random()*1.2+.3;this.vx=(Math.random()-.5)*.18;this.vy=(Math.random()-.5)*.18;this.a=Math.random()*.35+.05}s(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.re()}}
+  for(let i=0;i<55;i++)ps.push(new P());
+  const orbs=[{x:.15,y:.15,r:420,c:'15,232,126',a:.10},{x:.82,y:.78,r:360,c:'56,189,248',a:.08},{x:.5,y:.5,r:280,c:'167,139,250',a:.05}];
+  function dr(){cx.clearRect(0,0,W,H);orbs.forEach(o=>{const g=cx.createRadialGradient(o.x*W,o.y*H,0,o.x*W,o.y*H,o.r);g.addColorStop(0,`rgba(${o.c},${o.a})`);g.addColorStop(1,`rgba(${o.c},0)`);cx.fillStyle=g;cx.beginPath();cx.ellipse(o.x*W,o.y*H,o.r,o.r*.7,0,0,Math.PI*2);cx.fill()});ps.forEach(p=>{cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(180,220,255,${p.a})`;cx.fill();p.s()});requestAnimationFrame(dr)}
+  dr();
+})();
+
+const GEMINI_KEY = 'AIzaSyBxA1PZdTXs_V4Igq7bITOWNL0njEQxTjE';
+
+const CH = {
+  arjun:{name:'Arjun',em:'🦁',lang:'English',col:'#0fe87e',vl:'en-IN',tl:'en-IN',
+    sys:'You are Arjun, ShieldNet\'s sharp professional cybersecurity AI. Respond in confident clear English. Help Indian users identify and avoid phishing, UPI fraud, OTP scams, fake calls. Use bullet points. Give one actionable tip. Under 180 words.',
+    gr:'Hello! I\'m Arjun — ShieldNet\'s security expert. 🛡️\n\nI help you identify scams, fake links, fraudulent calls, and everything in between.\n\nWhat can I help you with today?',
+    sg:['How to spot a phishing link?','What is UPI refund fraud?','A stranger called claiming to be from TRAI','How do I report cybercrime in India?']},
+  priya:{name:'प्रिया',em:'🌸',lang:'हिंदी',col:'#f59e0b',vl:'hi-IN',tl:'hi-IN',
+    sys:'आप प्रिया हैं, ShieldNet की AI सुरक्षा सहायक। सिर्फ हिंदी में जवाब दें। भारतीय यूजर्स को ऑनलाइन ठगी, UPI फ्रॉड, OTP स्कैम से बचाएं। सरल हिंदी, बुलेट पॉइंट, एक काम की सलाह। 180 शब्दों से कम।',
+    gr:'नमस्ते! मैं प्रिया हूँ — आपकी ShieldNet साइबर सुरक्षा सहेली। 🛡️\n\nऑनलाइन ठगी, फर्जी कॉल या संदिग्ध लिंक — किसी भी चीज़ के बारे में पूछिए!\n\nआज मैं आपकी कैसे मदद करूँ?',
+    sg:['फ़िशिंग लिंक कैसे पहचानें?','UPI फ्रॉड से कैसे बचें?','संदिग्ध कॉल आई — क्या करूँ?','साइबर क्राइम की शिकायत कैसे करें?']},
+  meera:{name:'मीरा',em:'🦚',lang:'मराठी',col:'#a78bfa',vl:'mr-IN',tl:'mr-IN',
+    sys:'तुम्ही मीरा आहात, ShieldNet ची AI सुरक्षा तज्ञ. फक्त मराठीत उत्तर द्या. UPI फ्रॉड, OTP स्कॅम, फिशिंग बद्दल मदत करा. बुलेट पॉइंट वापरा. एक उपयुक्त सल्ला द्या. 180 शब्दांपेक्षा कमी.',
+    gr:'नमस्कार! मी मीरा आहे — ShieldNet ची सायबर सुरक्षा तज्ञ. 🛡️\n\nऑनलाइन फसवणूक, बनावट कॉल किंवा संशयास्पद लिंक — कशाबद्दलही विचारा!\n\nआज मी तुमची कशी मदत करू?',
+    sg:['फिशिंग लिंक कसे ओळखावे?','UPI फ्रॉडपासून कसे वाचावे?','संशयास्पद कॉल आला — काय करावे?','सायबर गुन्ह्याची तक्रार कुठे करावी?']},
+  vikram:{name:'Vikram',em:'🤖',lang:'Technical English',col:'#38bdf8',vl:'en-IN',tl:'en-IN',
+    sys:'You are Vikram, ShieldNet\'s technical cybersecurity analyst AI. Speak in technical but digestible English. Explain HOW attacks work: phishing kit architecture, SIM-swap vectors, AiTM proxies. Give precise technical mitigations. Under 200 words.',
+    gr:'// ShieldNet Technical Module — Online ✅\n\nI\'m Vikram. I go deep: how phishing kits are built, how SIM-swaps are executed, how social engineers script their calls.\n\nGive me a threat to dissect.',
+    sg:['How does a phishing kit actually work?','Explain a SIM-swap attack end to end','What is an AiTM proxy attack?','How do UPI refund scams work technically?']},
+  kavya:{name:'Kavya',em:'🦊',lang:'Casual English',col:'#fb923c',vl:'en-IN',tl:'en-IN',
+    sys:'You are Kavya, ShieldNet\'s fun casual security guide. Talk like a knowledgeable friend — not a textbook. Simple language, relatable examples, light humour. Help users stay safe without being scary. Easy actionable tip. Under 160 words.',
+    gr:'Hey! I\'m Kavya 👋\n\nThink of me as your savvy friend who nerds out on scam tactics so you don\'t have to.\n\nGot a weird SMS? Sketchy link? Strange call? Tell me everything!',
+    sg:['Got a weird SMS, is it a scam?','A "bank officer" just called me','How do I know if a website is fake?','My friend lost money in a job scam — now what?']},
+  shiva:{name:'Shiva',em:'🐉',lang:'Hinglish',col:'#f472b6',vl:'hi-IN',tl:'hi-IN',
+    sys:'You are Shiva, ShieldNet\'s Hinglish-speaking guide. Mix Hindi and English naturally like: "Yaar, yeh link bilkul fake hai, click mat karo!" Help users identify scams. Direct, casual, helpful. Under 160 words. Always Hinglish.',
+    gr:'Arre yaar, kya haal! 🔥\n\nMain Shiva hoon — ShieldNet ka apna Hinglish wala security expert.\n\nKoi bhi scam, fraud, ya suspicious cheez — seedha pooch lo. No bakwaas, pure help!\n\nBolo, kya scene hai?',
+    sg:['Yaar ek suspicious link mili hai — kya hai?','UPI se paise gaye, ab kya karein?','Banda call karke bank officer bol raha tha','Job ke liye deposit maang rahe hain — scam hai?']}
+};
+
+let selId=null, ac=null, hist=[], saved=JSON.parse(localStorage.getItem('sn_c')||'[]');
+let rec=null, isRec=false, drwOpen=false, mnOpen=false;
+let attachedFile=null;
+
+// ── Character select ──
+function pick(id,card){
+  selId=id;
+  document.querySelectorAll('.cc').forEach(c=>c.classList.remove('sel'));
+  card.classList.add('sel');
+  const ch=CH[id];
+  document.getElementById('sb').disabled=false;
+  const sh=document.getElementById('sh');
+  sh.textContent=ch.em+'  '+ch.name+' · '+ch.lang+'  — ready';
+  sh.style.color=ch.col;
+}
+
+function launch(){
+  if(!selId)return;
+  ac=CH[selId];
+  document.getElementById('sel').style.display='none';
+  document.getElementById('chat').classList.add('on');
+  initChat();
+}
+
+function goBack(){
+  document.getElementById('chat').classList.remove('on');
+  document.getElementById('sel').style.display='';
+  hist=[];
+  window.speechSynthesis?.cancel();
+  clearAttach();
+  closeDrawer();closeMenu();
+}
+
+function initChat(){
+  const av=document.getElementById('pav');
+  av.textContent=ac.em;av.style.background=ac.col+'18';av.style.borderColor=ac.col+'35';
+  av.style.setProperty('--cg',ac.col);
+  document.getElementById('pn').textContent=ac.name;
+  const pl=document.getElementById('pl');pl.textContent=ac.lang;pl.style.color=ac.col;
+  document.getElementById('cb').innerHTML='';hist=[];
+  addDsep();
+  setTimeout(()=>addBot(ac.gr,true),280);
+  renderSugs();renderDrawer();
+}
+
+function addDsep(){
+  const b=document.getElementById('cb'),d=document.createElement('div');d.className='dpill';
+  d.innerHTML='<span>'+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'})+'</span>';
+  b.appendChild(d);
+}
+
+function fmt(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>')}
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function addBot(text,skip){
+  const b=document.getElementById('cb'),id='b'+Date.now();
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const row=document.createElement('div');row.className='mr bot';row.id=id;
+  row.innerHTML='<div class="mav" style="background:'+ac.col+'14;border-color:'+ac.col+'28">'+ac.em+'</div><div class="bc"><div class="bub">'+fmt(text)+'</div><div class="bmeta"><span class="btime">'+t+'</span><button class="bb tts" data-txt="'+encodeURIComponent(text)+'" data-on="0" onclick="tglTTS(this)">🔊 Listen</button><button class="bb" onclick="cpyMsg(\''+encodeURIComponent(text)+'\')">📋 Copy</button></div></div>';
+  b.appendChild(row);b.scrollTop=b.scrollHeight;
+  if(!skip)hist.push({role:'model',parts:[{text}]});
+}
+
+function addUser(text, hasAttachment){
+  const b=document.getElementById('cb');
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const row=document.createElement('div');row.className='mr user';
+  const attachBadge = hasAttachment ? '<div style="font-size:11px;color:var(--em);margin-bottom:4px;opacity:.8">📎 Attachment included</div>' : '';
+  row.innerHTML='<div class="mav" style="background:rgba(15,232,126,.08);border-color:rgba(15,232,126,.18)">👤</div><div class="bc">'+attachBadge+'<div class="bub">'+esc(text)+'</div><span class="btime">'+t+'</span></div>';
+  b.appendChild(row);b.scrollTop=b.scrollHeight;
+}
+
+function showTyp(){
+  remTyp();
+  const b=document.getElementById('cb'),row=document.createElement('div');row.className='trow';row.id='ty';
+  row.innerHTML='<div class="mav" style="background:'+ac.col+'14;border-color:'+ac.col+'28">'+ac.em+'</div><div class="tbub"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  b.appendChild(row);b.scrollTop=b.scrollHeight;
+  document.getElementById('pav').classList.add('spk');
+}
+function remTyp(){document.getElementById('ty')?.remove();document.getElementById('pav').classList.remove('spk')}
+
+// ── SEND — fixed contents structure ──
+async function send(){
+  const ta=document.getElementById('cta');
+  const text=ta.value.trim();
+  if(!text && !attachedFile){return;}
+  const msgText = text || '📎 Please analyse this file.';
+  ta.value='';ar(ta);
+  document.getElementById('sw').style.display='none';
+
+  const hasFile = !!attachedFile;
+
+  // Build user parts for this message
+  const userParts=[];
+  if(attachedFile){
+    userParts.push({inline_data:{mime_type:attachedFile.mimeType,data:attachedFile.base64}});
+  }
+  userParts.push({text:msgText});
+
+  // Show in UI
+  addUser(msgText, hasFile);
+
+  // Push only text to history (keep context lean)
+  hist.push({role:'user',parts:[{text:msgText}]});
+
+  // Clear attachment before API call
+  clearAttach();
+  showTyp();
+
+  try{
+    // Build contents: previous history + current message with possible attachment
+    const contents=[
+      ...hist.slice(0,-1),           // all history except the last push
+      {role:'user',parts:userParts}  // current message with attachment if any
+    ];
+
+    const res=await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GEMINI_KEY,
+      {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          system_instruction:{parts:[{text:ac.sys}]},
+          contents:contents,
+          generationConfig:{temperature:.72,maxOutputTokens:650}
+        })
+      }
+    );
+    const d=await res.json();
+    const reply=d.candidates?.[0]?.content?.parts?.[0]?.text||'No response. Check your Gemini API key.';
+    remTyp();
+    addBot(reply);
+    hist.push({role:'model',parts:[{text:reply}]});
+  }catch(e){
+    remTyp();
+    addBot('⚠️ Error: '+e.message+'\n\nCheck your Gemini API key.');
+  }
+}
+
+// ── File attachment ──
+function handleFile(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(file.size>4*1024*1024){toast('⚠️','File too large — max 4MB');return;}
+
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const base64=ev.target.result.split(',')[1];
+    attachedFile={base64,mimeType:file.type,name:file.name};
+
+    const bar=document.getElementById('prevBar');
+    bar.style.display='flex';
+
+    if(file.type.startsWith('image/')){
+      const thumb=document.getElementById('prevThumb');
+      thumb.src=ev.target.result;
+      thumb.style.display='block';
+      document.getElementById('prevIcon').style.display='none';
+    } else {
+      document.getElementById('prevThumb').style.display='none';
+      document.getElementById('prevIcon').style.display='block';
+    }
+    document.getElementById('prevName').textContent=file.name;
+    toast('📎','File attached — type a message and send!');
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function clearAttach(){
+  attachedFile=null;
+  const bar=document.getElementById('prevBar');
+  bar.style.display='none';
+  document.getElementById('prevThumb').src='';
+  document.getElementById('prevThumb').style.display='none';
+  document.getElementById('prevIcon').style.display='none';
+  document.getElementById('prevName').textContent='';
+}
+
+// ── Voice ──
+function tglVoice(){
+  if(isRec){stopVoice();return}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('⚠️','Voice needs Chrome/Edge');return}
+  rec=new SR();rec.lang=ac.vl;rec.interimResults=false;
+  rec.onresult=e=>{document.getElementById('cta').value=e.results[0][0].transcript;ar(document.getElementById('cta'));stopVoice()};
+  rec.onerror=rec.onend=stopVoice;rec.start();isRec=true;
+  document.getElementById('micb').classList.add('rec');document.getElementById('micb').textContent='⏹';
+  document.getElementById('vs').classList.add('show');
+}
+function stopVoice(){
+  try{rec?.stop()}catch(e){}isRec=false;
+  const m=document.getElementById('micb');m.classList.remove('rec');m.textContent='🎤';
+  document.getElementById('vs').classList.remove('show');
+}
+
+// ── TTS ──
+function tglTTS(btn){
+  const on=btn.dataset.on==='1';
+  window.speechSynthesis.cancel();
+  document.querySelectorAll('.bb.tts').forEach(b=>{b.textContent='🔊 Listen';b.classList.remove('on');b.dataset.on='0'});
+  document.getElementById('pav').classList.remove('spk');
+  if(on)return;
+  const utt=new SpeechSynthesisUtterance(decodeURIComponent(btn.dataset.txt));
+  utt.lang=ac.tl;utt.rate=.9;utt.pitch=1.05;
+  btn.textContent='🔇 Stop';btn.classList.add('on');btn.dataset.on='1';
+  document.getElementById('pav').classList.add('spk');
+  const done=()=>{btn.textContent='🔊 Listen';btn.classList.remove('on');btn.dataset.on='0';document.getElementById('pav').classList.remove('spk')};
+  utt.onend=done;utt.onerror=done;window.speechSynthesis.speak(utt);
+}
+
+// ── Save/Load/Delete chats ──
+function saveChat(){
+  if(!hist.length){toast('⚠️','Nothing to save yet!');return}
+  const prev=hist.find(m=>m.role==='user')?.parts[0]?.text||'Chat';
+  const e={id:Date.now(),cid:selId,name:ac.name,em:ac.em,col:ac.col,preview:prev.slice(0,60)+(prev.length>60?'…':''),msgs:[...hist],at:new Date().toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+  saved.unshift(e);if(saved.length>30)saved=saved.slice(0,30);
+  localStorage.setItem('sn_c',JSON.stringify(saved));renderDrawer();toast('✅','Chat saved!');
+  const b=document.getElementById('svb');b.textContent='✓ Saved';b.style.color='#0fe87e';
+  setTimeout(()=>{b.innerHTML='💾 <span>Save</span>';b.style.color=''},2200);
+}
+
+function loadChat(id){
+  const c=saved.find(x=>x.id===id);if(!c)return;
+  selId=c.cid;ac=CH[c.cid]||ac;hist=[...c.msgs];
+  document.getElementById('cb').innerHTML='';addDsep();
+  c.msgs.forEach(m=>{if(m.role==='user')addUser(m.parts[0].text);else addBot(m.parts[0].text,true)});
+  const av=document.getElementById('pav');av.textContent=ac.em;av.style.background=ac.col+'18';av.style.borderColor=ac.col+'35';
+  document.getElementById('pn').textContent=ac.name;
+  const pl=document.getElementById('pl');pl.textContent=ac.lang;pl.style.color=ac.col;
+  document.getElementById('sw').style.display='none';closeDrawer();toast('📂','Chat loaded!');
+}
+
+function delChat(id,e){
+  e.stopPropagation();saved=saved.filter(x=>x.id!==id);localStorage.setItem('sn_c',JSON.stringify(saved));renderDrawer();toast('🗑️','Deleted.');
+}
+function delAllSaved(){
+  if(!confirm('Delete ALL saved chats? This is permanent.'))return;
+  saved=[];localStorage.removeItem('sn_c');renderDrawer();toast('🗑️','All chats deleted.');
+}
+function clrChat(){
+  if(!confirm('Clear the current conversation?'))return;
+  hist=[];document.getElementById('cb').innerHTML='';addDsep();
+  document.getElementById('sw').style.display='flex';
+  setTimeout(()=>addBot(ac.gr,true),200);toast('🧹','Cleared.');
+}
+function expChat(){
+  if(!hist.length){toast('⚠️','Nothing to export!');return}
+  const body=hist.map(m=>'['+(m.role==='user'?'You':ac.name)+']\n'+m.parts[0].text).join('\n\n───────────────────\n\n');
+  const blob=new Blob(['ShieldNet Chat Export\nCharacter: '+ac.name+' ('+ac.lang+')\nDate: '+new Date().toLocaleString()+'\n\n'+'═'.repeat(40)+'\n\n'+body],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='shieldnet_'+ac.name+'_'+Date.now()+'.txt';a.click();toast('📤','Exported!');
+}
+function cpyMsg(enc){navigator.clipboard?.writeText(decodeURIComponent(enc)).then(()=>toast('📋','Copied!'))}
+
+// ── Suggestions ──
+function renderSugs(){const w=document.getElementById('sw');w.style.display='flex';w.innerHTML=ac.sg.map(s=>'<div class="sg" onclick="usSug(this)">'+s+'</div>').join('')}
+function usSug(el){document.getElementById('cta').value=el.textContent;document.getElementById('sw').style.display='none';send()}
+
+// ── Drawer ──
+function renderDrawer(){
+  const b=document.getElementById('drwb');
+  if(!saved.length){b.innerHTML='<div class="dempty"><div class="dei">💬</div><div class="det">No saved chats yet.<br>Start chatting and hit <b>Save</b>.</div></div>';return}
+  b.innerHTML=saved.map(c=>'<div class="si" onclick="loadChat('+c.id+')"><div class="sav" style="border-color:'+c.col+'28;background:'+c.col+'10">'+c.em+'</div><div class="sinfo"><div class="sname">'+c.name+'</div><div class="sprev">'+c.preview+'</div><div class="stime">🕐 '+c.at+'</div></div><button class="delbtn" onclick="delChat('+c.id+',event)" title="Delete">🗑️</button></div>').join('');
+}
+function tglDrawer(){drwOpen=!drwOpen;document.getElementById('drw').classList.toggle('open',drwOpen);document.getElementById('dim').classList.toggle('show',drwOpen);closeMenu()}
+function closeDrawer(){drwOpen=false;document.getElementById('drw').classList.remove('open');document.getElementById('dim').classList.remove('show')}
+function tglMenu(e){e?.stopPropagation();mnOpen=!mnOpen;document.getElementById('mm').classList.toggle('open',mnOpen)}
+function closeMenu(){mnOpen=false;document.getElementById('mm').classList.remove('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('#mb')&&!e.target.closest('#mm'))closeMenu()});
+
+// ── Utils ──
+let toastT;
+function toast(icon,msg){clearTimeout(toastT);document.getElementById('ti').textContent=icon;document.getElementById('tm').textContent=msg;const t=document.getElementById('toast');t.classList.add('show');toastT=setTimeout(()=>t.classList.remove('show'),3000)}
+function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px'}
+</script>
+</body>
+</html>

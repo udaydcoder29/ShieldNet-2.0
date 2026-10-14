@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShieldNet — Setup Your Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080f1c;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);
+  --em:#10d97c;--amber:#f59e0b;--blue:#3b82f6;--red:#ef4444;
+  --text:#e2e8f0;--muted:#64748b;--card:rgba(10,18,33,0.92);
+}
+html,body{height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── BG ── */
+.bg-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:.3;animation:blobDrift 18s ease-in-out infinite alternate}
+.blob1{width:700px;height:700px;left:-200px;top:-150px;background:radial-gradient(circle,#10d97c55,transparent 70%);animation-delay:0s}
+.blob2{width:500px;height:500px;right:-100px;bottom:0;background:radial-gradient(circle,#3b82f655,transparent 70%);animation-delay:-7s}
+.blob3{width:350px;height:350px;left:45%;top:35%;background:radial-gradient(circle,#f59e0b22,transparent 70%);animation-delay:-13s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(35px,-45px) scale(1.08)}100%{transform:translate(-20px,28px) scale(.95)}}
+.bg-scene::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:56px 56px}
+
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.particle{position:absolute;border-radius:50%;background:var(--em);opacity:0;animation:pFloat linear infinite}
+@keyframes pFloat{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.2}90%{opacity:.08}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;padding:0 40px;background:rgba(8,15,28,.8);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-size:20px;font-weight:800;background:linear-gradient(to right,#fff 30%,var(--em));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.topbar-mark{width:34px;height:34px;background:linear-gradient(135deg,var(--em),#06b6d4);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(16,217,124,.35);flex-shrink:0}
+.topbar-right{margin-left:auto;font-size:13px;color:var(--muted)}
+.topbar-right span{color:var(--em);font-weight:600}
+
+/* ── MAIN SHELL ── */
+.shell{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:80px 24px 40px;min-height:100vh}
+
+/* ── CARD ── */
+.onboard-card{
+  width:100%;max-width:560px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 40px 80px rgba(0,0,0,.7),0 0 60px rgba(16,217,124,.05);
+  backdrop-filter:blur(20px);
+  animation:cardIn .7s cubic-bezier(.22,.68,0,1.2) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(40px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ── PROGRESS BAR ── */
+.progress-track{height:3px;background:var(--border);width:100%}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--em),#06b6d4);border-radius:0 3px 3px 0;transition:width .5s cubic-bezier(.22,.68,0,1.2)}
+
+/* ── STEP DOTS ── */
+.step-dots{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  padding:24px 40px 0;
+}
+.step-node{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;flex:1}
+.step-node:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 14px);right:calc(-50% + 14px);height:1px;background:var(--border);z-index:0;transition:background .4s}
+.step-node.done:not(:last-child)::after{background:var(--em)}
+.step-circle{
+  width:28px;height:28px;border-radius:50%;border:2px solid var(--border);
+  background:var(--bg);color:var(--muted);
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:1;
+  transition:border-color .3s,background .3s,color .3s,box-shadow .3s;
+}
+.step-node.active .step-circle{border-color:var(--em);background:rgba(16,217,124,.15);color:var(--em);box-shadow:0 0 12px rgba(16,217,124,.3)}
+.step-node.done .step-circle{border-color:var(--em);background:var(--em);color:#040a10}
+.step-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);transition:color .3s;white-space:nowrap}
+.step-node.active .step-label{color:var(--em)}
+.step-node.done .step-label{color:var(--em);opacity:.7}
+
+/* ── STEP PANELS ── */
+.step-body{padding:32px 40px 40px}
+
+.step-panel{display:none;animation:stepIn .4s cubic-bezier(.22,.68,0,1.2) both}
+.step-panel.active{display:block}
+@keyframes stepIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes stepInBack{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+.step-panel.back{animation:stepInBack .4s cubic-bezier(.22,.68,0,1.2) both}
+
+.step-emoji{font-size:40px;margin-bottom:12px;display:block;animation:emojiBounce .5s cubic-bezier(.22,.68,0,1.5) .1s both}
+@keyframes emojiBounce{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0deg)}}
+
+.step-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+.step-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+
+/* ── FIELDS ── */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.input-wrap{position:relative;display:flex;align-items:center}
+.fi{position:absolute;left:14px;color:var(--muted);pointer-events:none;transition:color .2s}
+.field input,.field select,.field textarea{
+  width:100%;padding:13px 14px 13px 44px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:11px;
+  color:#fff;font-family:'Outfit',sans-serif;font-size:15px;outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.field select{appearance:none;cursor:pointer}
+.field textarea{min-height:90px;resize:vertical;line-height:1.6;padding-top:13px}
+.field input::placeholder,.field textarea::placeholder{color:#2d3748}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(16,217,124,.45);background:rgba(16,217,124,.04);box-shadow:0 0 0 3px rgba(16,217,124,.09)}
+.input-wrap:focus-within .fi{color:var(--em)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── AVATAR PICKER ── */
+.avatar-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.av-opt{
+  width:54px;height:54px;border-radius:14px;
+  background:rgba(255,255,255,.05);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  cursor:pointer;transition:border-color .2s,background .2s,transform .2s;
+}
+.av-opt:hover{border-color:rgba(16,217,124,.3);transform:scale(1.08)}
+.av-opt.selected{border-color:var(--em);background:rgba(16,217,124,.12);box-shadow:0 0 12px rgba(16,217,124,.25);transform:scale(1.1)}
+
+/* ── ROLE PILLS ── */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.role-card{
+  padding:14px 16px;border-radius:12px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  cursor:pointer;transition:border-color .2s,background .2s,transform .15s;
+  display:flex;align-items:center;gap:12px;
+}
+.role-card:hover{border-color:rgba(16,217,124,.25);transform:translateY(-2px)}
+.role-card.selected{border-color:var(--em);background:rgba(16,217,124,.08)}
+.role-icon{font-size:22px;flex-shrink:0}
+.role-label{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff}
+.role-desc{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── TOGGLE CHIPS ── */
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{
+  padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1px solid var(--border);color:var(--muted);background:var(--surface);
+  cursor:pointer;transition:background .2s,border-color .2s,color .2s,transform .15s;
+}
+.chip:hover{transform:translateY(-1px)}
+.chip.on{background:rgba(16,217,124,.12);border-color:rgba(16,217,124,.35);color:var(--em)}
+
+/* ── RANGE SLIDER ── */
+.range-wrap{margin-bottom:20px}
+.range-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px}
+.range-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--em);margin-bottom:10px}
+input[type=range]{
+  width:100%;-webkit-appearance:none;height:4px;
+  border-radius:2px;background:var(--border);outline:none;
+  transition:background .2s;
+}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--em);box-shadow:0 0 10px rgba(16,217,124,.4);cursor:pointer;border:2px solid var(--bg);transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:12px;margin-top:8px}
+.btn{flex:1;padding:14px;border:none;border-radius:11px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:transform .15s,filter .2s,box-shadow .2s;position:relative;overflow:hidden}
+.btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .15s}
+.btn:hover::before{background:rgba(255,255,255,.07)}.btn:active{transform:scale(.98)}
+.btn-next{background:linear-gradient(135deg,var(--em),#06b6d4);color:#040a10;box-shadow:0 4px 22px rgba(16,217,124,.25)}
+.btn-next:hover{box-shadow:0 6px 32px rgba(16,217,124,.4);filter:brightness(1.06)}
+.btn-back{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted)}
+.btn-back:hover{border-color:rgba(255,255,255,.2);color:#fff}
+.btn-finish{background:linear-gradient(135deg,var(--em) 0%,#06b6d4 50%,var(--amber) 100%);background-size:200%;color:#040a10;font-size:15px;animation:shimmer 3s linear infinite}
+@keyframes shimmer{to{background-position:200% center}}
+
+/* ── COMPLETE SCREEN ── */
+#step-done{text-align:center}
+.done-shield{
+  width:100px;height:100px;margin:0 auto 24px;
+  background:linear-gradient(135deg,var(--em),#06b6d4);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 60px rgba(16,217,124,.45),0 0 120px rgba(16,217,124,.15);
+  animation:shieldPop .7s cubic-bezier(.22,.68,0,1.5) both;
+}
+@keyframes shieldPop{from{transform:scale(0) rotate(-30deg);opacity:0}to{transform:scale(1) rotate(0deg);opacity:1}}
+.confetti-row{font-size:28px;margin-bottom:20px;animation:fadeUp .5s ease .3s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.done-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff;margin-bottom:8px;animation:fadeUp .5s ease .4s both}
+.done-sub{font-size:14px;color:var(--muted);line-height:1.7;max-width:360px;margin:0 auto 28px;animation:fadeUp .5s ease .5s both}
+.profile-preview{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;
+  padding:20px;margin-bottom:24px;text-align:left;
+  animation:fadeUp .5s ease .55s both;
+}
+.pp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.pp-row:last-child{border-bottom:none}
+.pp-key{color:var(--muted);font-weight:500}.pp-val{color:#fff;font-weight:600;text-align:right}
+
+/* error */
+.field-err{font-size:11px;color:var(--red);margin-top:5px;display:none}
+.field-err.show{display:block}
+.field input.err,.field select.err{border-color:rgba(239,68,68,.5)!important}
+
+@media(max-width:600px){
+  .shell{padding:70px 12px 24px}
+  .step-body{padding:24px 22px 28px}
+  .field-row,.role-grid{grid-template-columns:1fr}
+  .step-dots{padding:20px 16px 0}
+  .step-label{display:none}
+  .topbar{padding:0 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-scene">
+  <div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="topbar-logo" href="index.html">
+    <div class="topbar-mark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="white" opacity=".9"/>
+        <path d="M9 12l2 2 4-4" stroke="#040a10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    ShieldNet
+  </a>
+  <div class="topbar-right">Setting up your account — <span>Step <span id="topStep">1</span> of 4</span></div>
+</div>
+
+<!-- SHELL -->
+<div class="shell">
+<div class="onboard-card">
+
+  <!-- Progress bar -->
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+
+  <!-- Step dots -->
+  <div class="step-dots">
+    <div class="step-node active" id="node-1">
+      <div class="step-circle">1</div>
+      <div class="step-label">Identity</div>
+    </div>
+    <div class="step-node" id="node-2">
+      <div class="step-circle">2</div>
+      <div class="step-label">Profile</div>
+    </div>
+    <div class="step-node" id="node-3">
+      <div class="step-circle">3</div>
+      <div class="step-label">Security</div>
+    </div>
+    <div class="step-node" id="node-4">
+      <div class="step-circle">✓</div>
+      <div class="step-label">Done</div>
+    </div>
+  </div>
+
+  <div class="step-body">
+
+    <!-- ── STEP 1: IDENTITY ── -->
+    <div class="step-panel active" id="step-1">
+      <span class="step-emoji">👋</span>
+      <div class="step-title">Let's get to know you</div>
+      <p class="step-sub">Tell us your name and a few basics so we can personalise your ShieldNet experience.</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label>First Name</label>
+          <div class="input-wrap">
+            <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="fname" placeholder="Arjun"/>
+          </div>
+          <div class="field-err" id="err-fname">Please enter your first name</div>
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <div class="input-wrap">
+            <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="lname" placeholder="Mehta"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Display Name / Username</label>
+        <div class="input-wrap">
+          <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <input type="text" id="username" placeholder="arjun_shield"/>
+        </div>
+        <div class="field-err" id="err-username">Please choose a username</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Date of Birth</label>
+          <div class="input-wrap">
+            <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <input type="date" id="dob" style="color-scheme:dark"/>
+          </div>
+          <div class="field-err" id="err-dob">Please enter your date of birth</div>
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <div class="input-wrap">
+            <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M16 16c0-2.2-1.8-4-4-4s-4 1.8-4 4"/></svg>
+            <select id="gender">
+              <option value="" style="background:#0d1829">Select</option>
+              <option style="background:#0d1829">Male</option>
+              <option style="background:#0d1829">Female</option>
+              <option style="background:#0d1829">Non-binary</option>
+              <option style="background:#0d1829">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Country</label>
+        <div class="input-wrap">
+          <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <select id="country">
+            <option value="" style="background:#0d1829">Select country</option>
+            <option style="background:#0d1829">India</option>
+            <option style="background:#0d1829">United States</option>
+            <option style="background:#0d1829">United Kingdom</option>
+            <option style="background:#0d1829">Germany</option>
+            <option style="background:#0d1829">Australia</option>
+            <option style="background:#0d1829">Singapore</option>
+            <option style="background:#0d1829">Canada</option>
+            <option style="background:#0d1829">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-next" onclick="goStep(2)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: PROFILE ── -->
+    <div class="step-panel" id="step-2">
+      <span class="step-emoji">🎭</span>
+      <div class="step-title">Make it yours</div>
+      <p class="step-sub">Pick an avatar and tell us what you do — we'll customise your dashboard for you.</p>
+
+      <div class="field">
+        <label>Choose Your Avatar</label>
+        <div class="avatar-grid" id="avatarGrid">
+          <div class="av-opt selected" data-av="🦁" onclick="pickAvatar(this)">🦁</div>
+          <div class="av-opt" data-av="🐺" onclick="pickAvatar(this)">🐺</div>
+          <div class="av-opt" data-av="🦊" onclick="pickAvatar(this)">🦊</div>
+          <div class="av-opt" data-av="🐉" onclick="pickAvatar(this)">🐉</div>
+          <div class="av-opt" data-av="🤖" onclick="pickAvatar(this)">🤖</div>
+          <div class="av-opt" data-av="👾" onclick="pickAvatar(this)">👾</div>
+          <div class="av-opt" data-av="🦅" onclick="pickAvatar(this)">🦅</div>
+          <div class="av-opt" data-av="🐼" onclick="pickAvatar(this)">🐼</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Your Role / What You Do</label>
+        <div class="role-grid">
+          <div class="role-card selected" id="role-personal" onclick="pickRole(this,'Personal')">
+            <span class="role-icon">🏠</span>
+            <div><div class="role-label">Personal</div><div class="role-desc">Protecting myself & family</div></div>
+          </div>
+          <div class="role-card" id="role-student" onclick="pickRole(this,'Student')">
+            <span class="role-icon">🎓</span>
+            <div><div class="role-label">Student</div><div class="role-desc">Learning about security</div></div>
+          </div>
+          <div class="role-card" id="role-professional" onclick="pickRole(this,'IT Professional')">
+            <span class="role-icon">💼</span>
+            <div><div class="role-label">IT Professional</div><div class="role-desc">Managing org security</div></div>
+          </div>
+          <div class="role-card" id="role-developer" onclick="pickRole(this,'Developer')">
+            <span class="role-icon">👨‍💻</span>
+            <div><div class="role-label">Developer</div><div class="role-desc">Securing my apps & code</div></div>
+          </div>
+          <div class="role-card" id="role-enterprise" onclick="pickRole(this,'Enterprise')">
+            <span class="role-icon">🏢</span>
+            <div><div class="role-label">Enterprise</div><div class="role-desc">Team or company-wide</div></div>
+          </div>
+          <div class="role-card" id="role-researcher" onclick="pickRole(this,'Researcher')">
+            <span class="role-icon">🔬</span>
+            <div><div class="role-label">Researcher</div><div class="role-desc">Security research & CTFs</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(1,true)">← Back</button>
+        <button class="btn btn-next" onclick="goStep(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: SECURITY PREFS ── -->
+    <div class="step-panel" id="step-3">
+      <span class="step-emoji">🛡️</span>
+      <div class="step-title">Your security profile</div>
+      <p class="step-sub">Help us tune your protection level and alerts to match how you actually use the internet.</p>
+
+      <div class="field">
+        <label>Protection Level</label>
+        <div class="range-wrap">
+          <div class="range-val" id="rangeLabel">Balanced</div>
+          <input type="range" id="protRange" min="1" max="3" value="2" oninput="updateRange(this.value)"/>
+          <div class="range-labels"><span>Essential</span><span>Balanced</span><span>Maximum</span></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>What do you want to protect?</label>
+        <div class="chip-wrap" id="protectChips">
+          <div class="chip on" onclick="toggleChip(this)">🖥️ Devices</div>
+          <div class="chip on" onclick="toggleChip(this)">🌐 Network</div>
+          <div class="chip" onclick="toggleChip(this)">📧 Email</div>
+          <div class="chip" onclick="toggleChip(this)">💳 Financial</div>
+          <div class="chip" onclick="toggleChip(this)">📁 Files & Docs</div>
+          <div class="chip" onclick="toggleChip(this)">🔑 Passwords</div>
+          <div class="chip" onclick="toggleChip(this)">📱 Mobile</div>
+          <div class="chip" onclick="toggleChip(this)">☁️ Cloud Storage</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Alert Preference</label>
+        <div class="input-wrap">
+          <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <select id="alertPref">
+            <option style="background:#0d1829">All threats — keep me informed</option>
+            <option style="background:#0d1829">High severity only</option>
+            <option style="background:#0d1829">Critical only — minimal interruption</option>
+            <option style="background:#0d1829">Weekly digest only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>How did you hear about ShieldNet?</label>
+        <div class="input-wrap">
+          <svg class="fi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <select id="source">
+            <option value="" style="background:#0d1829">Select source</option>
+            <option style="background:#0d1829">Google / Search</option>
+            <option style="background:#0d1829">Friend or Colleague</option>
+            <option style="background:#0d1829">Social Media</option>
+            <option style="background:#0d1829">Tech Blog / Article</option>
+            <option style="background:#0d1829">YouTube</option>
+            <option style="background:#0d1829">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(2,true)">← Back</button>
+        <button class="btn btn-finish" onclick="goStep(4)">Activate My Shield 🚀</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: DONE ── -->
+    <div class="step-panel" id="step-4" style="text-align:center">
+      <div class="confetti-row">🎉 🛡️ 🎉</div>
+      <div class="done-shield">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="white" opacity=".9"/>
+          <path d="M9 12l2 2 4-4" stroke="#040a10" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="done-title">You're all set, <span id="welcomeName" style="color:var(--em)">Shield Agent</span>!</div>
+      <p class="done-sub">Your personalised security profile is live. ShieldNet is now actively watching over you.</p>
+
+      <div class="profile-preview" id="profilePreview"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-next" style="font-size:15px" onclick="window.location.href='dashboard.html'">Go to Dashboard →</button>
+      </div>
+    </div>
+
+  </div><!-- step-body -->
+</div><!-- card -->
+</div><!-- shell -->
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyAEVc0RJ3doiWWDk6XIMCubF47fMKldkuw",
+  authDomain:"shieldnet-web-app.firebaseapp.com",
+  projectId:"shieldnet-web-app",
+  storageBucket:"shieldnet-web-app.firebasestorage.app",
+  messagingSenderId:"831990307810",
+  appId:"1:831990307810:web:0a559e4c315fc043b037bb"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ── GUARD: only new users who haven't completed setup ──
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    // Not logged in → back to login
+    window.location.href = 'index.html';
+    return;
+  }
+
+  // Check if profile already exists in Firestore
+  const profileRef = doc(db, 'users', user.uid);
+  const snap = await getDoc(profileRef);
+
+  if (snap.exists() && snap.data().setupComplete) {
+    // Existing user with completed profile → skip to dashboard
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // New user — show the setup form, store uid globally
+  window._uid = user.uid;
+  window._userEmail = user.email;
+});
+
+// ── SAVE PROFILE ──
+window.saveProfile = async () => {
+  if (!window._uid) return;
+
+  const data = {
+    uid: window._uid,
+    email: window._userEmail,
+    firstName: document.getElementById('fname').value.trim(),
+    lastName: document.getElementById('lname').value.trim(),
+    username: document.getElementById('username').value.trim(),
+    dob: document.getElementById('dob').value,
+    gender: document.getElementById('gender').value,
+    country: document.getElementById('country').value,
+    avatar: window._selectedAvatar || '🦁',
+    role: window._selectedRole || 'Personal',
+    protectionLevel: ['Essential','Balanced','Maximum'][parseInt(document.getElementById('protRange').value)-1],
+    alertPreference: document.getElementById('alertPref').value,
+    heardFrom: document.getElementById('source').value,
+    protectItems: [...document.querySelectorAll('#protectChips .chip.on')].map(c=>c.textContent.trim()),
+    setupComplete: true,
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    await setDoc(doc(db,'users',window._uid), data);
+  } catch(e) {
+    console.warn('Firestore write failed (may be offline):', e.message);
+  }
+
+  // Build profile preview
+  buildPreview(data);
+};
+</script>
+
+<script>
+// ── PARTICLES ──
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<24;i++){
+    const d=document.createElement('div');d.className='particle';
+    const sz=Math.random()*3+1;
+    d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${Math.random()*22+16}s;animation-delay:-${Math.random()*22}s`;
+    c.appendChild(d);
+  }
+})();
+
+// ── STATE ──
+window._selectedAvatar = '🦁';
+window._selectedRole = 'Personal';
+let currentStep = 1;
+
+// ── AVATAR ──
+function pickAvatar(el){
+  document.querySelectorAll('.av-opt').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
+  window._selectedAvatar = el.dataset.av;
+}
+
+// ── ROLE ──
+function pickRole(el, label){
+  document.querySelectorAll('.role-card').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+  window._selectedRole = label;
+}
+
+// ── CHIP TOGGLE ──
+function toggleChip(el){ el.classList.toggle('on') }
+
+// ── RANGE ──
+const rangeLabs = ['Essential','Balanced','Maximum'];
+function updateRange(v){ document.getElementById('rangeLabel').textContent = rangeLabs[v-1] }
+
+// ── VALIDATION ──
+function validateStep1(){
+  let ok=true;
+  const checks=[
+    {id:'fname', errId:'err-fname', check: v=>v.trim().length>0},
+    {id:'username', errId:'err-username', check: v=>v.trim().length>2},
+    {id:'dob', errId:'err-dob', check: v=>v!==''},
+  ];
+  checks.forEach(({id,errId,check})=>{
+    const el=document.getElementById(id);
+    const err=document.getElementById(errId);
+    if(!check(el.value)){
+      el.classList.add('err');err.classList.add('show');ok=false;
+    } else {
+      el.classList.remove('err');err.classList.remove('show');
+    }
+  });
+  return ok;
+}
+
+// ── STEP NAVIGATION ──
+function goStep(n, back=false){
+  if(n===2 && !validateStep1()) return;
+  if(n===4){
+    // Save to Firestore
+    if(window.saveProfile) window.saveProfile();
+  }
+
+  // Update panels
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active','back'));
+  const panel = document.getElementById('step-'+n);
+  panel.classList.add('active');
+  if(back) panel.classList.add('back');
+
+  // Update dots
+  document.querySelectorAll('.step-node').forEach((node,i)=>{
+    const idx=i+1;
+    node.classList.remove('active','done');
+    if(idx < n) node.classList.add('done');
+    if(idx === n) node.classList.add('active');
+  });
+
+  // Checkmark on done node
+  const doneNode = document.querySelector('#node-4 .step-circle');
+  doneNode.textContent = n===4 ? '✓' : '4';
+
+  // Progress
+  const pct = {1:25,2:50,3:75,4:100}[n];
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('topStep').textContent = n;
+
+  currentStep=n;
+
+  // Scroll to top of card
+  document.querySelector('.onboard-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── PROFILE PREVIEW (step 4) ──
+function buildPreview(data){
+  const el=document.getElementById('profilePreview');
+  const av=data ? data.avatar : (window._selectedAvatar||'🦁');
+  const fn=data ? data.firstName : (document.getElementById('fname').value||'Shield Agent');
+  const role=data ? data.role : window._selectedRole;
+  const country=data ? data.country : (document.getElementById('country').value||'—');
+  const level=data ? data.protectionLevel : rangeLabs[parseInt(document.getElementById('protRange').value)-1];
+
+  document.getElementById('welcomeName').textContent = fn || 'Shield Agent';
+
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <div style="width:52px;height:52px;border-radius:14px;background:rgba(16,217,124,.12);border:1px solid rgba(16,217,124,.25);display:flex;align-items:center;justify-content:center;font-size:28px">${av}</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff">${document.getElementById('fname').value||''} ${document.getElementById('lname').value||''}</div>
+        <div style="font-size:12px;color:var(--em);font-weight:600">@${document.getElementById('username').value||'shield_user'}</div>
+      </div>
+    </div>
+    <div class="pp-row"><span class="pp-key">Role</span><span class="pp-val">${role}</span></div>
+    <div class="pp-row"><span class="pp-key">Country</span><span class="pp-val">${country||'—'}</span></div>
+    <div class="pp-row"><span class="pp-key">Protection Level</span><span class="pp-val" style="color:var(--em)">${level}</span></div>
+    <div class="pp-row"><span class="pp-key">Account Status</span><span class="pp-val" style="color:var(--em)">✓ Active</span></div>
+  `;
+}
+
+// Expose functions globally
+window.goStep=goStep;
+window.pickAvatar=pickAvatar;
+window.pickRole=pickRole;
+window.toggleChip=toggleChip;
+window.updateRange=updateRange;
+window.buildPreview=buildPreview;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080f1c;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);--em:#10d97c;--amber:#f59e0b;--blue:#3b82f6;--red:#ef4444;--text:#e2e8f0;--muted:#64748b;--card:rgba(10,18,33,0.95)}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;padding:24px;min-height:100vh}
+.page-header{margin-bottom:28px}
+.page-header h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
+.page-header p{font-size:13px;color:var(--muted)}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.settings-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px}
+.ss-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none;padding-bottom:0}
+.setting-info .s-label{font-size:14px;font-weight:500;color:#fff;margin-bottom:3px}
+.setting-info .s-desc{font-size:12px;color:var(--muted)}
+/* Toggle */
+.toggle{width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:background .3s;flex-shrink:0}
+.toggle.on{background:var(--em)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle.on::after{transform:translateX(20px)}
+/* Profile */
+.profile-av{width:70px;height:70px;border-radius:18px;background:rgba(16,217,124,.1);border:2px solid rgba(16,217,124,.3);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:16px;cursor:pointer;transition:transform .2s}
+.profile-av:hover{transform:scale(1.05)}
+.f-input{width:100%;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:9px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border-color .2s;margin-bottom:10px}
+.f-input:focus{border-color:rgba(16,217,124,.4)}
+.save-btn{padding:11px 24px;background:var(--em);color:#040a10;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:filter .2s;margin-top:6px}
+.save-btn:hover{filter:brightness(1.08)}
+.danger-btn{padding:11px 24px;background:rgba(239,68,68,.12);color:var(--red);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;border:1px solid rgba(239,68,68,.25);border-radius:9px;cursor:pointer;transition:background .2s;margin-top:6px}
+.danger-btn:hover{background:rgba(239,68,68,.2)}
+.api-key-wrap{display:flex;gap:8px;margin-top:10px}
+.api-key-input{flex:1;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:9px;color:#fff;font-family:'monospace';font-size:13px;outline:none}
+.api-key-input:focus{border-color:rgba(16,217,124,.4)}
+.api-save-btn{padding:10px 16px;background:var(--em);color:#040a10;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;border:none;border-radius:9px;cursor:pointer;white-space:nowrap}
+.badge-em{background:rgba(16,217,124,.1);color:var(--em);border:1px solid rgba(16,217,124,.2);font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+@media(max-width:700px){.settings-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page-header">
+  <h1>⚙️ Settings</h1>
+  <p>Manage your account, notifications, and security preferences</p>
+</div>
+<div class="settings-grid">
+  <!-- Profile -->
+  <div class="settings-section">
+    <div class="ss-title">👤 Profile</div>
+    <div class="profile-av" id="settingsAv" onclick="cycleAvatar()">🦁</div>
+    <input class="f-input" placeholder="First Name" id="set-fname"/>
+    <input class="f-input" placeholder="Last Name" id="set-lname"/>
+    <input class="f-input" placeholder="Username" id="set-uname"/>
+    <input class="f-input" placeholder="Email" type="email" id="set-email" readonly style="opacity:.5"/>
+    <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+  </div>
+  <!-- Notifications -->
+  <div class="settings-section">
+    <div class="ss-title">🔔 Notifications</div>
+    <div class="setting-row">
+      <div class="setting-info"><div class="s-label">Threat Alerts</div><div class="s-desc">Instant alerts when threats are detected</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-info"><div class="s-label">Community Reports</div><div class="s-desc">Notify when new scams are reported near you</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-info"><div class="s-label">Weekly Digest</div><div class="s-desc">Weekly summary of threats and tips</div></div>
+      <div class="toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-info"><div class="s-label">Breaking Fraud News</div><div class="s-desc">Major fraud alerts as they happen</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+  </div>
+  <!-- Security -->
+  <div class="settings-section">
+    <div class="ss-title">🛡️ Security</div>
+    <div class="setting-row">
+      <div class="setting-info"><div class="s-label">Two-Factor Auth</div><div class="s-desc">Add extra protection to your account</div></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="badge-em">Active</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-info"><div class="s-label">Login Alerts</div><div class="s-desc">Email when a new device logs in</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-info"><div class="s-label">Auto-scan Clipboard</div><div class="s-desc">Scan copied links automatically</div></div>
+      <div class="toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px">Change Password</div>
+      <input class="f-input" type="password" placeholder="New password"/>
+      <button class="save-btn">Update Password</button>
+    </div>
+  </div>
+  <!-- Gemini API -->
+  <div class="settings-section">
+    <div class="ss-title">🤖 Gemini AI Key</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Enter your Gemini API key to enable AI-powered scanning, the chatbot, and community analysis. <a href="https://aistudio.google.com" target="_blank" style="color:var(--em)">Get a free key →</a></p>
+    <div class="api-key-wrap">
+      <input class="api-key-input" id="geminiKey" type="password" placeholder="AIza..."/>
+      <button class="api-save-btn" onclick="saveKey()">Save</button>
+    </div>
+    <div id="keyStatus" style="font-size:12px;color:var(--muted);margin-top:10px"></div>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:8px">Danger Zone</div>
+      <button class="danger-btn" onclick="if(confirm('Delete account? This cannot be undone.'))alert('Contact support to delete your account.')">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const avatars=['🦁','🐺','🦊','🐉','🤖','👾','🦅','🐼'];
+let avIdx=0;
+function cycleAvatar(){avIdx=(avIdx+1)%avatars.length;document.getElementById('settingsAv').textContent=avatars[avIdx]}
+
+function saveProfile(){
+  const fname=document.getElementById('set-fname').value;
+  const lname=document.getElementById('set-lname').value;
+  if(!fname){alert('Please enter your first name');return}
+  alert(`Profile saved! Welcome, ${fname} ${lname}`);
+}
+
+function saveKey(){
+  const key=document.getElementById('geminiKey').value.trim();
+  if(!key.startsWith('AIza')){document.getElementById('keyStatus').textContent='⚠️ Key should start with AIza...';return}
+  localStorage.setItem('geminiKey',key);
+  document.getElementById('keyStatus').textContent='✅ Key saved! Reload scanner/chatbot pages to apply.';
+  document.getElementById('keyStatus').style.color='var(--em)';
+}
+
+// Load saved key
+const saved=localStorage.getItem('geminiKey');
+if(saved) document.getElementById('geminiKey').value=saved;
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fraud News</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080f1c;--surface:rgba(255,255,255,0.045);--border:rgba(255,255,255,0.08);--em:#10d97c;--amber:#f59e0b;--blue:#3b82f6;--red:#ef4444;--purple:#a855f7;--text:#e2e8f0;--muted:#64748b;--card:rgba(10,18,33,0.95)}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;padding:24px;min-height:100vh}
+
+.page-header{margin-bottom:24px}
+.page-header h1{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:4px}
+.page-header p{font-size:13px;color:var(--muted)}
+
+/* TICKER */
+.ticker-wrap{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;overflow:hidden}
+.ticker-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);background:rgba(239,68,68,.15);padding:3px 8px;border-radius:5px;flex-shrink:0}
+.ticker-text{font-size:13px;color:var(--text);white-space:nowrap;animation:ticker 30s linear infinite}
+@keyframes ticker{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+/* CATEGORIES */
+.cat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.cat-btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.cat-btn:hover,.cat-btn.active{border-color:rgba(16,217,124,.35);background:rgba(16,217,124,.1);color:var(--em)}
+
+/* FEATURED */
+.featured{background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(168,85,247,.06));border:1px solid rgba(239,68,68,.2);border-radius:16px;padding:24px;margin-bottom:24px;position:relative;overflow:hidden}
+.featured::before{content:'🚨 BREAKING';position:absolute;top:14px;right:16px;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--red);background:rgba(239,68,68,.12);padding:3px 10px;border-radius:20px;border:1px solid rgba(239,68,68,.25)}
+.featured-cat{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin-bottom:10px}
+.featured-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.25}
+.featured-body{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.featured-meta{font-size:11px;color:var(--muted)}
+.featured-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.read-btn{padding:9px 20px;background:var(--em);color:#040a10;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;border:none;border-radius:9px;cursor:pointer;transition:filter .2s}
+.read-btn:hover{filter:brightness(1.08)}
+.ai-tip-btn{padding:9px 18px;background:rgba(16,217,124,.08);color:var(--em);border:1px solid rgba(16,217,124,.2);font-size:12px;font-weight:600;border-radius:9px;cursor:pointer;transition:background .2s}
+.ai-tip-btn:hover{background:rgba(16,217,124,.15)}
+
+/* NEWS GRID */
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.news-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:20px;cursor:pointer;transition:border-color .2s,transform .2s;
+  animation:fadeUp .4s ease both;display:flex;flex-direction:column;
+}
+.news-card:hover{border-color:rgba(16,217,124,.2);transform:translateY(-3px)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.news-cat-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:12px;display:inline-block}
+.news-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;line-height:1.35;margin-bottom:8px}
+.news-body{font-size:12px;color:var(--muted);line-height:1.65;flex:1;margin-bottom:14px}
+.news-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);padding-top:12px;border-top:1px solid var(--border)}
+.news-source{display:flex;align-items:center;gap:6px}
+.source-dot{width:6px;height:6px;border-radius:50%}
+.news-ai-btn{font-size:11px;font-weight:600;color:var(--em);background:none;border:none;cursor:pointer;padding:0;transition:opacity .2s}
+.news-ai-btn:hover{opacity:.7}
+
+/* AI PANEL */
+.ai-panel{
+  margin-top:14px;background:rgba(16,217,124,.05);border:1px solid rgba(16,217,124,.15);
+  border-radius:10px;padding:14px;font-size:12px;color:var(--text);line-height:1.7;
+  display:none;
+}
+.ai-panel.show{display:block}
+.ai-panel-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--em);margin-bottom:8px}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(16,217,124,.3);border-top-color:var(--em);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* HOW TO AVOID SECTION */
+.avoid-section{margin-top:32px;background:var(--card);border:1px solid rgba(16,217,124,.2);border-radius:16px;padding:24px}
+.avoid-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;margin-bottom:16px}
+.avoid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.avoid-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .2s}
+.avoid-card:hover{border-color:rgba(16,217,124,.25)}
+.avoid-icon{font-size:24px;margin-bottom:10px}
+.avoid-tip-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:6px}
+.avoid-tip-body{font-size:12px;color:var(--muted);line-height:1.6}
+
+@media(max-width:500px){.news-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📰 Fraud News & Alerts</h1>
+  <p>Latest cyber fraud incidents in India — and exactly how to protect yourself</p>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <span class="ticker-label">LIVE</span>
+  <span class="ticker-text">🚨 New UPI scam reported in Delhi NCR &nbsp;|&nbsp; ⚠️ Fake IRCTC refund links circulating on WhatsApp &nbsp;|&nbsp; 🔴 SIM swap fraud cases up 34% in Q1 2025 &nbsp;|&nbsp; ⚠️ Fake electricity bill SMS targeting Maharashtra users &nbsp;|&nbsp; 🚨 Deepfake video calls used in new CEO fraud</span>
+</div>
+
+<!-- CATEGORIES -->
+<div class="cat-row">
+  <div class="cat-btn active" onclick="filterNews('all',this)">📋 All</div>
+  <div class="cat-btn" onclick="filterNews('upi',this)">💳 UPI Fraud</div>
+  <div class="cat-btn" onclick="filterNews('phishing',this)">🎣 Phishing</div>
+  <div class="cat-btn" onclick="filterNews('call',this)">📞 Call Scams</div>
+  <div class="cat-btn" onclick="filterNews('job',this)">💼 Job Scams</div>
+  <div class="cat-btn" onclick="filterNews('crypto',this)">₿ Crypto Fraud</div>
+</div>
+
+<!-- FEATURED -->
+<div class="featured">
+  <div class="featured-cat">🔴 HIGH ALERT — UPI Fraud</div>
+  <div class="featured-title">₹2,800 Crore Lost to Cyber Fraud in First Quarter of 2025 — RBI Issues Emergency Advisory</div>
+  <div class="featured-body">The Reserve Bank of India has issued an emergency advisory as cyber fraud losses crossed ₹2,800 crore in Q1 2025. UPI-based scams account for 61% of all cases. The most common vector: fake "refund" requests that appear to come from legitimate bank numbers. AI-generated voice calls mimicking bank officers are now responsible for 23% of all cases.</div>
+  <div class="featured-meta">📅 March 10, 2025 &nbsp;|&nbsp; 🏛️ RBI India &nbsp;|&nbsp; 👁 142K views</div>
+  <div class="featured-actions">
+    <button class="read-btn">Read Full Report</button>
+    <button class="ai-tip-btn" onclick="getAITip(this,'UPI fraud surge India 2025 RBI advisory ₹2800 crore losses')">🤖 Get AI Protection Tips</button>
+  </div>
+  <div class="ai-panel" id="featured-ai"></div>
+</div>
+
+<!-- NEWS GRID -->
+<div class="news-grid" id="newsGrid"></div>
+
+<!-- HOW TO AVOID -->
+<div class="avoid-section">
+  <div class="avoid-title">🛡️ How to Protect Yourself — General Rules</div>
+  <div class="avoid-grid">
+    <div class="avoid-card">
+      <div class="avoid-icon">🔒</div>
+      <div class="avoid-tip-title">Never share OTP</div>
+      <div class="avoid-tip-body">No bank, TRAI, or government agency will ever ask for your OTP, PIN or CVV over a phone call or message.</div>
+    </div>
+    <div class="avoid-card">
+      <div class="avoid-icon">🔗</div>
+      <div class="avoid-tip-title">Verify URLs carefully</div>
+      <div class="avoid-tip-body">Real bank sites use .com or .in — never .xyz, .info, or hyphenated domains. Always check before clicking.</div>
+    </div>
+    <div class="avoid-card">
+      <div class="avoid-icon">📲</div>
+      <div class="avoid-tip-title">UPI receive = you pay</div>
+      <div class="avoid-tip-body">A UPI "collect request" debits YOU. If someone asks you to approve a request to "send" money, it is a scam.</div>
+    </div>
+    <div class="avoid-card">
+      <div class="avoid-icon">📞</div>
+      <div class="avoid-tip-title">Hang up on "officers"</div>
+      <div class="avoid-tip-body">Police, CBI, or TRAI do not arrest people over phone calls. Any such threat is 100% a scam. Hang up immediately.</div>
+    </div>
+    <div class="avoid-card">
+      <div class="avoid-icon">💼</div>
+      <div class="avoid-tip-title">Jobs don't need deposits</div>
+      <div class="avoid-tip-body">Legitimate employers never ask for "security deposits", "training fees", or advance payments. Any such request is fraud.</div>
+    </div>
+    <div class="avoid-card">
+      <div class="avoid-icon">🚨</div>
+      <div class="avoid-tip-title">Report on Cybercrime.gov.in</div>
+      <div class="avoid-tip-body">Report all cyber fraud at cybercrime.gov.in or call 1930 (National Cyber Helpline) within the first hour for maximum recovery chance.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GEMINI_KEY = 'AIzaSyBxA1PZdTXs_V4Igq7bITOWNL0njEQxTjE';
+
+const NEWS_DATA = [
+  {id:1,cat:'upi',catLabel:'💳 UPI Fraud',catColor:'var(--amber)',dotColor:'#f59e0b',title:'Fake QR Code Scam Targets Small Merchants Across India',body:'Fraudsters are replacing legitimate QR codes at shops with their own codes. Customers pay but merchant never receives money. Over 2,000 complaints filed in February alone.',source:'NDTV Tech',date:'Mar 9, 2025',severity:'high'},
+  {id:2,cat:'phishing',catLabel:'🎣 Phishing',catColor:'var(--red)',dotColor:'#ef4444',title:'WhatsApp "KYC Update" Messages Leading to Bank Account Takeover',body:'Fake messages posing as SBI and ICICI ask users to click a link to update KYC. The link installs a screen-sharing app that gives scammers full control.',source:'The Hindu Tech',date:'Mar 8, 2025',severity:'high'},
+  {id:3,cat:'call',catLabel:'📞 Call Scam',catColor:'var(--purple)',dotColor:'#a855f7',title:'AI Voice Cloning Used to Impersonate Family Members in Distress Calls',body:'Victims receive calls from "their children" in distress asking for urgent money transfer. Voice is cloned from social media videos. 47 cases reported in Hyderabad.',source:'Economic Times',date:'Mar 7, 2025',severity:'high'},
+  {id:4,cat:'job',catLabel:'💼 Job Scam',catColor:'var(--blue)',dotColor:'#3b82f6',title:'Fake LinkedIn Jobs Targeting Fresh Graduates with ₹50,000/month Offers',body:'Scammers create fake company profiles on LinkedIn and conduct fake interviews. After "selection", demand ₹3,000-15,000 as security deposit for laptop or uniform.',source:'Mint',date:'Mar 6, 2025',severity:'medium'},
+  {id:5,cat:'crypto',catLabel:'₿ Crypto',catColor:'var(--em)',dotColor:'#10d97c',title:'"Pig Butchering" Crypto Scam Victims Lose Average ₹18 Lakh Each',body:'Romance scam where fraudsters build weeks-long trust before introducing a "guaranteed" crypto investment platform. Platform shows fake profits, then disappears.',source:'India Today',date:'Mar 5, 2025',severity:'high'},
+  {id:6,cat:'phishing',catLabel:'🎣 Phishing',catColor:'var(--red)',dotColor:'#ef4444',title:'Fake IRCTC Refund Links Circulating Widely on WhatsApp',body:'Messages claim your train was cancelled and offer ₹450-1200 refund. Link collects card details and OTP. Railways never processes refunds via WhatsApp links.',source:'Times of India',date:'Mar 4, 2025',severity:'medium'},
+];
+
+let activeFilter='all';
+
+function renderNews(){
+  const grid=document.getElementById('newsGrid');
+  const filtered=activeFilter==='all'?NEWS_DATA:NEWS_DATA.filter(n=>n.cat===activeFilter);
+  grid.innerHTML=filtered.map((n,i)=>`
+    <div class="news-card" style="animation-delay:${i*60}ms">
+      <span class="news-cat-tag" style="background:rgba(255,255,255,.05);border:1px solid ${n.dotColor}33;color:${n.catColor}">${n.catLabel}</span>
+      <div class="news-title">${n.title}</div>
+      <div class="news-body">${n.body}</div>
+      <div class="news-meta">
+        <div class="news-source"><div class="source-dot" style="background:${n.dotColor}"></div>${n.source} · ${n.date}</div>
+        <button class="news-ai-btn" onclick="toggleNewsAI(${n.id},this,'${encodeURIComponent(n.title+'. '+n.body)}')">🤖 Tips</button>
+      </div>
+      <div class="ai-panel" id="news-ai-${n.id}"></div>
+    </div>`).join('');
+}
+
+function filterNews(cat,el){
+  activeFilter=cat;
+  document.querySelectorAll('.cat-btn').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderNews();
+}
+
+async function toggleNewsAI(id,btn,encodedText){
+  const panel=document.getElementById('news-ai-'+id);
+  if(panel.classList.contains('show')){panel.classList.remove('show');btn.textContent='🤖 Tips';return}
+  panel.classList.add('show');
+  panel.innerHTML=`<div class="ai-panel-label">🤖 AI Protection Tips</div><span class="spinner"></span> Getting tips…`;
+  btn.textContent='⏳';btn.disabled=true;
+
+  const text=decodeURIComponent(encodedText);
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:`Based on this fraud news: "${text}"\n\nGive exactly 3 specific, actionable tips an Indian user can follow right now to protect themselves. Number them 1, 2, 3. Be very concise. Include any official helpline numbers if relevant.`}]}],generationConfig:{temperature:.3,maxOutputTokens:350}})
+    });
+    const data=await res.json();
+    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'No tips available.';
+    panel.innerHTML=`<div class="ai-panel-label">🤖 AI Protection Tips</div>${reply.replace(/\n/g,'<br>')}`;
+  }catch(e){
+    panel.innerHTML=`<div class="ai-panel-label">🤖 AI Protection Tips</div>⚠️ ${e.message}`;
+  }
+  btn.textContent='🤖 Tips';btn.disabled=false;
+}
+
+async function getAITip(btn,topic){
+  const panel=document.getElementById('featured-ai');
+  if(panel.classList.contains('show')){panel.classList.remove('show');return}
+  panel.classList.add('show');
+  panel.innerHTML=`<div class="ai-panel-label">🤖 Gemini AI — Protection Tips</div><span class="spinner"></span> Generating…`;
+  btn.textContent='⏳ Generating…';btn.disabled=true;
+
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:`Given this news: "${topic}"\n\nProvide:\n1) A simple explanation of how this scam works\n2) 4 specific steps to protect yourself\n3) What to do if you've already been scammed\n4) Official reporting resources in India\n\nBe concise and practical.`}]}],generationConfig:{temperature:.3,maxOutputTokens:500}})
+    });
+    const data=await res.json();
+    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'No tips.';
+    panel.innerHTML=`<div class="ai-panel-label">🤖 Gemini AI — Protection Tips</div>${reply.replace(/\n/g,'<br>')}`;
+  }catch(e){
+    panel.innerHTML=`<div class="ai-panel-label">🤖 Gemini AI — Protection Tips</div>⚠️ ${e.message}`;
+  }
+  btn.textContent='🤖 Get AI Protection Tips';btn.disabled=false;
+}
+
+renderNews();
+</script>
+</body>
+</html>
